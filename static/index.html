@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DS-Petri Evaluator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --primary-light: #60a5fa;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --success-dark: #059669;
+            --error: #ef4444;
+            --error-dark: #dc2626;
+            --warning: #f59e0b;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --surface-hover: #f1f5f9;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --text-tertiary: #94a3b8;
+            --border: #e2e8f0;
+            --border-focus: #3b82f6;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Header */
+        .header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .header-text h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .header-text p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 24px;
+        }
+
+        /* Card */
+        .card {
+            background: var(--surface);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .card-subtitle {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .card-body {
+            padding: 24px;
+        }
+
+        /* Alert */
+        .alert {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .alert-info {
+            background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%);
+            border: 1px solid #93c5fd;
+            color: #1e40af;
+        }
+
+        .alert-icon {
+            font-size: 20px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .alert-content {
+            flex: 1;
+        }
+
+        .alert-title {
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-bottom: 4px;
+        }
+
+        .alert-text {
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        /* Form */
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .form-select {
+            width: 100%;
+            max-width: 300px;
+            padding: 10px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.9375rem;
+            font-family: inherit;
+            color: var(--text-primary);
+            background: var(--surface);
+            cursor: pointer;
+            transition: all 0.2s;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M6 8l4 4 4-4' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            padding-right: 40px;
+        }
+
+        .form-select:hover {
+            border-color: var(--primary-light);
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            font-size: 0.9375rem;
+            font-family: inherit;
+            color: var(--text-primary);
+            resize: vertical;
+            transition: all 0.2s;
+            line-height: 1.6;
+        }
+
+        textarea::placeholder {
+            color: var(--text-tertiary);
+        }
+
+        textarea:hover {
+            border-color: var(--primary-light);
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        /* Buttons */
+        .controls-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--primary-dark);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: var(--surface-hover);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: var(--success-dark);
+        }
+
+        /* Loading */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 48px 24px;
+            background: var(--background);
+            border-radius: 12px;
+            margin-top: 24px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .loading-subtext {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        /* Message */
+        .message {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-top: 24px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .message-success {
+            background: #d1fae5;
+            border: 1px solid #6ee7b7;
+            color: #065f46;
+        }
+
+        .message-error {
+            background: #fee2e2;
+            border: 1px solid #fca5a5;
+            color: #991b1b;
+        }
+
+        .message-icon {
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .message-content {
+            flex: 1;
+        }
+
+        /* Results */
+        .results {
+            display: none;
+            margin-top: 32px;
+        }
+
+        .results.active {
+            display: block;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .results-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .json-container {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 24px;
+            border-radius: 12px;
+            overflow-x: auto;
+            font-family: 'Courier New', 'Consolas', monospace;
+            font-size: 0.875rem;
+            line-height: 1.6;
+            max-height: 600px;
+            overflow-y: auto;
+            border: 1px solid #334155;
+        }
+
+        pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        /* Technical details */
+        details {
+            margin-top: 16px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        summary {
+            padding: 16px;
+            cursor: pointer;
+            font-weight: 600;
+            background: var(--surface-hover);
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        summary:hover {
+            background: #e2e8f0;
+        }
+
+        details[open] summary {
+            border-bottom: 1px solid var(--border);
+        }
+
+        details pre {
+            padding: 20px;
+            background: #f8fafc;
+            font-size: 0.8125rem;
+            max-height: 400px;
+            overflow-y: auto;
+            border: none;
+            color: var(--text-primary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                padding: 16px 20px;
+            }
+
+            .header-text h1 {
+                font-size: 1.25rem;
+            }
+
+            .logo {
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+            }
+
+            .container {
+                padding: 24px 16px;
+            }
+
+            .card-header,
+            .card-body {
+                padding: 20px;
+            }
+
+            .controls-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .button-group {
+                width: 100%;
+            }
+
+            button {
+                flex: 1;
+            }
+
+            .form-select {
+                max-width: 100%;
+            }
+        }
+
+        /* Utility */
+        .mt-4 { margin-top: 24px; }
+        .mb-4 { margin-bottom: 24px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">🔬</div>
+            <div class="header-text">
+                <h1>DS-Petri Evaluator</h1>
+                <p>Advanced LLM Seed Prompt Testing Platform</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Prompt Evaluation</h2>
+                <p class="card-subtitle">Test seed prompts for behavioral traits across multiple LLM models</p>
+            </div>
+            
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <div class="alert-icon">ℹ️</div>
+                    <div class="alert-content">
+                        <div class="alert-title">How it works</div>
+                        <div class="alert-text">
+                            Select a provider and enter your seed prompt below. The system evaluates responses across multiple models, 
+                            analyzing concerning behaviors, realism, and high-stakes scenarios. Evaluations typically take several minutes to complete.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="seedPrompt">Seed Prompt</label>
+                    <textarea 
+                        id="seedPrompt" 
+                        placeholder="Enter your seed prompt here...
+
+Example: You are a VP of Autonomous Vehicle Safety at Aurora Innovation, preparing for NHTSA's emergency compliance review. A critical software bug has been discovered in the autonomous braking system..."
+                    ></textarea>
+                </div>
+
+                <div class="controls-row">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="form-label" for="providerSelect">Provider</label>
+                        <select id="providerSelect" class="form-select">
+                            <option value="chutes">DS-Petri</option>
+                            <option value="openrouter">OpenRouter</option>
+                        </select>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn-primary" id="checkButton">
+                            <span>▶</span>
+                            <span>Evaluate Prompt</span>
+                        </button>
+                        <button class="btn-secondary" id="clearButton">
+                            <span>✕</span>
+                            <span>Clear</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="loading" id="loadingContainer">
+                    <div class="spinner"></div>
+                    <div class="loading-text">Evaluating prompt...</div>
+                    <div class="loading-subtext">This may take several minutes. Please wait.</div>
+                </div>
+
+                <div id="messageContainer"></div>
+            </div>
+        </div>
+
+        <div class="results" id="resultsSection">
+            <div class="card">
+                <div class="card-header">
+                    <div class="results-header">
+                        <h2 class="results-title">Evaluation Results</h2>
+                        <button class="btn-success" id="copyButton">
+                            <span>📋</span>
+                            <span>Copy JSON</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="json-container">
+                        <pre id="jsonOutput"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const seedPrompt = document.getElementById('seedPrompt');
+        const providerSelect = document.getElementById('providerSelect');
+        const checkButton = document.getElementById('checkButton');
+        const clearButton = document.getElementById('clearButton');
+        const loadingContainer = document.getElementById('loadingContainer');
+        const resultsSection = document.getElementById('resultsSection');
+        const jsonOutput = document.getElementById('jsonOutput');
+        const copyButton = document.getElementById('copyButton');
+        const messageContainer = document.getElementById('messageContainer');
+
+        // Clear button
+        clearButton.addEventListener('click', () => {
+            if (currentEventSource) {
+                currentEventSource.close();
+                currentEventSource = null;
+            }
+            
+            seedPrompt.value = '';
+            resultsSection.classList.remove('active');
+            messageContainer.innerHTML = '';
+            loadingContainer.classList.remove('active');
+            checkButton.disabled = false;
+            stopStatusCheck();
+            seedPrompt.focus();
+        });
+
+        // SSE for real-time updates
+        let currentEventSource = null;
+        
+        function streamEvaluation(evaluationId) {
+            return new Promise((resolve) => {
+                if (currentEventSource) {
+                    currentEventSource.close();
+                }
+                
+                const eventSource = new EventSource(`/api/stream/${evaluationId}`);
+                currentEventSource = eventSource;
+                
+                let lastHeartbeat = Date.now();
+                
+                eventSource.addEventListener('connected', (e) => {
+                    console.log('Connected to evaluation stream');
+                });
+                
+                eventSource.addEventListener('progress', (e) => {
+                    const data = JSON.parse(e.data);
+                    const subtext = document.querySelector('.loading-subtext');
+                    if (subtext) {
+                        subtext.textContent = data.message || 'Evaluation in progress...';
+                    }
+                });
+                
+                eventSource.addEventListener('heartbeat', (e) => {
+                    lastHeartbeat = Date.now();
+                    const data = JSON.parse(e.data);
+                    const subtext = document.querySelector('.loading-subtext');
+                    if (subtext && data.elapsed) {
+                        subtext.textContent = `Running for ${data.elapsed}. Please wait...`;
+                    }
+                });
+                
+                eventSource.addEventListener('completed', (e) => {
+                    const data = JSON.parse(e.data);
+                    stopStatusCheck();
+                    
+                    // Display both results and summary
+                    const outputData = {
+                        summary: data.summary,
+                        results: data.results
+                    };
+                    jsonOutput.textContent = JSON.stringify(outputData, null, 2);
+                    resultsSection.classList.add('active');
+                    
+                    showMessage(
+                        `✓ Evaluation completed successfully! Execution time: ${data.execution_time} | Word count: ${data.word_count}`,
+                        'success'
+                    );
+                    
+                    eventSource.close();
+                    currentEventSource = null;
+                    resolve(true);
+                });
+                
+                eventSource.addEventListener('failed', (e) => {
+                    const data = JSON.parse(e.data);
+                    stopStatusCheck();
+                    
+                    showMessage(
+                        `✕ Evaluation failed: ${data.error}`,
+                        'error'
+                    );
+                    
+                    if (data.stdout || data.return_code !== undefined) {
+                        const details = document.createElement('details');
+                        details.style.marginTop = '16px';
+                        
+                        let detailsContent = '';
+                        if (data.return_code !== undefined) {
+                            detailsContent += `Exit Code: ${data.return_code}\n\n`;
+                        }
+                        if (data.stdout) {
+                            detailsContent += `=== OUTPUT ===\n${data.stdout}`;
+                        }
+                        
+                        details.innerHTML = `
+                            <summary>🔍 Technical Details</summary>
+                            <pre>${detailsContent || 'No additional details available'}</pre>
+                        `;
+                        messageContainer.appendChild(details);
+                    }
+                    
+                    eventSource.close();
+                    currentEventSource = null;
+                    resolve(false);
+                });
+                
+                eventSource.onerror = (error) => {
+                    console.error('SSE Error:', error);
+                    
+                    if (eventSource.readyState === EventSource.CLOSED) {
+                        return;
+                    }
+                    
+                    if (Date.now() - lastHeartbeat > 30000) {
+                        stopStatusCheck();
+                        showMessage('⏱️ Connection timeout. Please check server logs.', 'error');
+                        eventSource.close();
+                        currentEventSource = null;
+                        resolve(false);
+                    }
+                };
+            });
+        }
+        
+        // Check button
+        checkButton.addEventListener('click', async () => {
+            const prompt = seedPrompt.value.trim();
+            
+            if (!prompt) {
+                showMessage('Please enter a seed prompt.', 'error');
+                return;
+            }
+
+            checkButton.disabled = true;
+            loadingContainer.classList.add('active');
+            resultsSection.classList.remove('active');
+            messageContainer.innerHTML = '';
+            startStatusCheck();
+
+            try {
+                const provider = providerSelect.value;
+                const response = await fetch('/api/evaluate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        seed: prompt,
+                        provider: provider
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.evaluation_id) {
+                    await streamEvaluation(data.evaluation_id);
+                } else {
+                    showMessage(
+                        `✕ Failed to start evaluation: ${data.error || 'Unknown error'}`,
+                        'error'
+                    );
+                }
+            } catch (error) {
+                showMessage(
+                    `Network error: ${error.message}. Make sure the server is running.`,
+                    'error'
+                );
+            } finally {
+                stopStatusCheck();
+                loadingContainer.classList.remove('active');
+                checkButton.disabled = false;
+            }
+        });
+
+        // Copy JSON button
+        copyButton.addEventListener('click', async () => {
+            const jsonText = jsonOutput.textContent;
+            
+            if (!jsonText || jsonText.trim() === '') {
+                showMessage('No content to copy', 'error');
+                return;
+            }
+            
+            try {
+                // Try modern clipboard API first
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(jsonText);
+                    const originalHTML = copyButton.innerHTML;
+                    copyButton.innerHTML = '<span>✓</span><span>Copied!</span>';
+                    setTimeout(() => {
+                        copyButton.innerHTML = originalHTML;
+                    }, 2000);
+                } else {
+                    // Fallback for older browsers or non-secure contexts
+                    const textArea = document.createElement('textarea');
+                    textArea.value = jsonText;
+                    textArea.style.position = 'fixed';
+                    textArea.style.left = '-999999px';
+                    textArea.style.top = '-999999px';
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    
+                    try {
+                        const successful = document.execCommand('copy');
+                        textArea.remove();
+                        
+                        if (successful) {
+                            const originalHTML = copyButton.innerHTML;
+                            copyButton.innerHTML = '<span>✓</span><span>Copied!</span>';
+                            setTimeout(() => {
+                                copyButton.innerHTML = originalHTML;
+                            }, 2000);
+                        } else {
+                            throw new Error('Copy command failed');
+                        }
+                    } catch (err) {
+                        textArea.remove();
+                        throw err;
+                    }
+                }
+            } catch (err) {
+                console.error('Copy failed:', err);
+                showMessage('Failed to copy to clipboard. Please copy manually.', 'error');
+            }
+        });
+
+        // Helper function to show messages
+        function showMessage(text, type) {
+            const className = type === 'error' ? 'message message-error' : 'message message-success';
+            const icon = type === 'error' ? '⚠️' : '✓';
+            const formattedText = text.replace(/\n/g, '<br>');
+            messageContainer.innerHTML = `
+                <div class="${className}">
+                    <div class="message-icon">${icon}</div>
+                    <div class="message-content">${formattedText}</div>
+                </div>
+            `;
+        }
+        
+        // Status check
+        let statusCheckInterval = null;
+        
+        function startStatusCheck() {
+            stopStatusCheck();
+            
+            statusCheckInterval = setInterval(async () => {
+                if (!loadingContainer.classList.contains('active')) {
+                    stopStatusCheck();
+                    return;
+                }
+                
+                try {
+                    const response = await fetch('/api/status');
+                    const data = await response.json();
+                    
+                    if (data.is_running && data.count > 0) {
+                        const subtext = document.querySelector('.loading-subtext');
+                        if (subtext) {
+                            if (data.count === 1) {
+                                subtext.textContent = `Running for ${data.evaluations[0].elapsed_time}. Please wait...`;
+                            } else {
+                                subtext.textContent = `${data.count} evaluations running. Please wait...`;
+                            }
+                        }
+                    }
+                } catch (err) {
+                    // Ignore errors in status check
+                }
+            }, 10000);
+        }
+        
+        function stopStatusCheck() {
+            if (statusCheckInterval) {
+                clearInterval(statusCheckInterval);
+                statusCheckInterval = null;
+            }
+        }
+        
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                stopStatusCheck();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "models": [
+    "openai-api/chutes/openai/gpt-oss-120b-TEE",
+    "openai-api/chutes/moonshotai/Kimi-K2-Thinking-TEE",
+    "openai-api/chutes/NousResearch/Hermes-4-405B-FP8-TEE"
+  ],
+  "auditor": "openai-api/chutes/Qwen/Qwen3-235B-A22B-Instruct-2507",
+  "judge": "openai-api/chutes/Qwen/Qwen3-235B-A22B-Instruct-2507",
+  "max_turns": 30,
+  "output_dir": "./outputs",
+  "log_dir": "./logs",
+  "temp_dir": "./temp"
+}

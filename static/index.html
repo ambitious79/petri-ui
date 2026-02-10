@@ -36,7 +36,6 @@
             --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
             --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
             --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
         }
 
         body {
@@ -45,7 +44,6 @@
             color: var(--text-primary);
             line-height: 1.6;
             -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
         }
 
         /* Header */
@@ -57,450 +55,312 @@
             top: 0;
             z-index: 100;
         }
-
         .header-content {
-            max-width: 1200px;
+            max-width: 1600px;
             margin: 0 auto;
-            padding: 20px 24px;
+            padding: 16px 24px;
             display: flex;
             align-items: center;
             gap: 16px;
         }
-
         .logo {
-            width: 48px;
-            height: 48px;
+            width: 44px; height: 44px;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px; flex-shrink: 0;
         }
-
-        .header-text h1 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 2px;
+        .header-text h1 { font-size: 1.35rem; font-weight: 700; }
+        .header-text p { font-size: 0.8rem; color: var(--text-secondary); }
+        .header-nav {
+            margin-left: auto;
+            display: flex; gap: 8px; align-items: center;
         }
-
-        .header-text p {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
+        .nav-link {
+            padding: 7px 14px; font-size: 0.8125rem; font-weight: 500;
+            color: var(--text-secondary); text-decoration: none;
+            border-radius: 8px; transition: all 0.2s;
         }
+        .nav-link:hover { color: var(--primary); background: rgba(59,130,246,0.08); }
+        .nav-link.active { color: var(--primary); background: rgba(59,130,246,0.1); font-weight: 600; }
 
-        /* Container */
-        .container {
-            max-width: 1200px;
+        /* Main Layout */
+        .main-layout {
+            max-width: 1600px;
             margin: 0 auto;
-            padding: 32px 24px;
+            padding: 24px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            align-items: start;
         }
 
         /* Card */
         .card {
             background: var(--surface);
-            border-radius: 16px;
+            border-radius: 14px;
             border: 1px solid var(--border);
             box-shadow: var(--shadow);
             overflow: hidden;
         }
-
         .card-header {
-            padding: 24px;
+            padding: 20px;
             border-bottom: 1px solid var(--border);
         }
-
-        .card-title {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 4px;
-        }
-
-        .card-subtitle {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-        }
-
-        .card-body {
-            padding: 24px;
-        }
+        .card-title { font-size: 1.05rem; font-weight: 600; margin-bottom: 2px; }
+        .card-subtitle { font-size: 0.8rem; color: var(--text-secondary); }
+        .card-body { padding: 20px; }
 
         /* Alert */
         .alert {
-            padding: 16px 20px;
-            border-radius: 12px;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
+            padding: 12px 16px; border-radius: 10px; margin-bottom: 20px;
+            display: flex; align-items: flex-start; gap: 10px;
         }
-
         .alert-info {
             background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%);
-            border: 1px solid #93c5fd;
-            color: #1e40af;
+            border: 1px solid #93c5fd; color: #1e40af;
         }
-
-        .alert-icon {
-            font-size: 20px;
-            flex-shrink: 0;
-            margin-top: 2px;
-        }
-
-        .alert-content {
-            flex: 1;
-        }
-
-        .alert-title {
-            font-weight: 600;
-            font-size: 0.875rem;
-            margin-bottom: 4px;
-        }
-
-        .alert-text {
-            font-size: 0.875rem;
-            line-height: 1.5;
-        }
+        .alert-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+        .alert-content { flex: 1; }
+        .alert-title { font-weight: 600; font-size: 0.8125rem; margin-bottom: 2px; }
+        .alert-text { font-size: 0.8rem; line-height: 1.5; }
 
         /* Form */
-        .form-group {
-            margin-bottom: 24px;
-        }
-
-        .form-label {
-            display: block;
-            font-weight: 600;
-            font-size: 0.875rem;
-            color: var(--text-primary);
-            margin-bottom: 8px;
-        }
-
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; font-weight: 600; font-size: 0.8125rem; margin-bottom: 6px; }
         .form-select {
-            width: 100%;
-            max-width: 300px;
-            padding: 10px 14px;
-            border: 1.5px solid var(--border);
-            border-radius: 8px;
-            font-size: 0.9375rem;
-            font-family: inherit;
-            color: var(--text-primary);
-            background: var(--surface);
-            cursor: pointer;
-            transition: all 0.2s;
+            width: 100%; max-width: 280px;
+            padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 8px;
+            font-size: 0.875rem; font-family: inherit; color: var(--text-primary);
+            background: var(--surface); cursor: pointer; transition: all 0.2s;
             appearance: none;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M6 8l4 4 4-4' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 10px center;
-            padding-right: 40px;
+            background-repeat: no-repeat; background-position: right 8px center; padding-right: 36px;
         }
+        .form-select:focus { outline: none; border-color: var(--border-focus); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
 
-        .form-select:hover {
-            border-color: var(--primary-light);
+        /* Model checkboxes */
+        .model-selection { display: flex; gap: 10px; flex-wrap: wrap; }
+        .model-checkbox {
+            display: flex; align-items: center; gap: 8px;
+            padding: 10px 14px; background: var(--surface);
+            border: 1.5px solid var(--border); border-radius: 8px;
+            cursor: pointer; transition: all 0.2s; user-select: none; font-size: 0.8125rem;
         }
-
-        .form-select:focus {
-            outline: none;
-            border-color: var(--border-focus);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        .model-checkbox:hover { border-color: var(--primary-light); background: var(--surface-hover); }
+        .model-checkbox:has(input:checked) { border-color: var(--primary); background: rgba(59,130,246,0.06); }
+        .model-checkbox input { display: none; }
+        .checkbox-custom {
+            width: 18px; height: 18px; border: 2px solid var(--border);
+            border-radius: 4px; display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s; flex-shrink: 0;
         }
+        .model-checkbox:has(input:checked) .checkbox-custom { background: var(--primary); border-color: var(--primary); }
+        .checkbox-custom::after {
+            content: ''; width: 5px; height: 9px;
+            border: solid white; border-width: 0 2px 2px 0;
+            transform: rotate(45deg) scale(0); transition: transform 0.15s ease;
+        }
+        .model-checkbox:has(input:checked) .checkbox-custom::after { transform: rotate(45deg) scale(1); }
+        .model-name { font-weight: 500; color: var(--text-primary); }
+        .model-selection-hint { margin-top: 8px; font-size: 0.75rem; color: var(--text-tertiary); }
 
         textarea {
-            width: 100%;
-            min-height: 200px;
-            padding: 14px;
-            border: 1.5px solid var(--border);
-            border-radius: 12px;
-            font-size: 0.9375rem;
-            font-family: inherit;
-            color: var(--text-primary);
-            resize: vertical;
-            transition: all 0.2s;
-            line-height: 1.6;
+            width: 100%; min-height: 160px; padding: 12px;
+            border: 1.5px solid var(--border); border-radius: 10px;
+            font-size: 0.875rem; font-family: inherit; color: var(--text-primary);
+            resize: vertical; transition: all 0.2s; line-height: 1.6;
         }
-
-        textarea::placeholder {
-            color: var(--text-tertiary);
-        }
-
-        textarea:hover {
-            border-color: var(--primary-light);
-        }
-
-        textarea:focus {
-            outline: none;
-            border-color: var(--border-focus);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
+        textarea::placeholder { color: var(--text-tertiary); }
+        textarea:hover { border-color: var(--primary-light); }
+        textarea:focus { outline: none; border-color: var(--border-focus); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
 
         /* Buttons */
         .controls-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 16px;
-            margin-top: 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            gap: 12px; margin-top: 16px;
         }
-
-        .button-group {
-            display: flex;
-            gap: 12px;
-        }
-
+        .button-group { display: flex; gap: 10px; }
         button {
-            padding: 12px 24px;
-            font-size: 0.9375rem;
-            font-weight: 600;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-family: inherit;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
+            padding: 10px 20px; font-size: 0.8125rem; font-weight: 600;
+            border: none; border-radius: 8px; cursor: pointer;
+            transition: all 0.2s; font-family: inherit;
+            display: inline-flex; align-items: center; justify-content: center; gap: 6px;
         }
-
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .btn-primary:hover:not(:disabled) {
-            background: var(--primary-dark);
-            box-shadow: var(--shadow-md);
-            transform: translateY(-1px);
-        }
-
-        .btn-primary:active:not(:disabled) {
-            transform: translateY(0);
-        }
-
-        .btn-primary:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .btn-secondary {
-            background: var(--surface-hover);
-            color: var(--text-primary);
-            border: 1px solid var(--border);
-        }
-
-        .btn-secondary:hover {
-            background: #e2e8f0;
-        }
-
-        .btn-success {
-            background: var(--success);
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: var(--success-dark);
-        }
-
-        /* Loading */
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 48px 24px;
-            background: var(--background);
-            border-radius: 12px;
-            margin-top: 24px;
-        }
-
-        .loading.active {
-            display: block;
-        }
-
-        .spinner {
-            width: 48px;
-            height: 48px;
-            border: 4px solid var(--border);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin: 0 auto 20px;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .loading-text {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 8px;
-        }
-
-        .loading-subtext {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-        }
+        .btn-primary { background: var(--primary); color: white; box-shadow: var(--shadow-sm); }
+        .btn-primary:hover:not(:disabled) { background: var(--primary-dark); box-shadow: var(--shadow-md); transform: translateY(-1px); }
+        .btn-primary:active:not(:disabled) { transform: translateY(0); }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+        .btn-secondary { background: var(--surface-hover); color: var(--text-primary); border: 1px solid var(--border); }
+        .btn-secondary:hover { background: #e2e8f0; }
+        .btn-danger { background: var(--error); color: white; }
+        .btn-danger:hover { background: var(--error-dark); }
+        .btn-sm { padding: 6px 12px; font-size: 0.7rem; border-radius: 6px; }
+        .btn-xs { padding: 4px 8px; font-size: 0.65rem; border-radius: 5px; }
 
         /* Message */
         .message {
-            padding: 16px 20px;
-            border-radius: 12px;
-            margin-top: 24px;
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
+            padding: 12px 16px; border-radius: 10px; margin-top: 16px;
+            display: flex; align-items: flex-start; gap: 10px; font-size: 0.8125rem;
         }
+        .message-success { background: #d1fae5; border: 1px solid #6ee7b7; color: #065f46; }
+        .message-error { background: #fee2e2; border: 1px solid #fca5a5; color: #991b1b; }
 
-        .message-success {
-            background: #d1fae5;
-            border: 1px solid #6ee7b7;
-            color: #065f46;
+        /* ========== SUBMISSION QUEUE ========== */
+        .queue-panel { position: sticky; top: 80px; }
+        .queue-header {
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 8px;
         }
-
-        .message-error {
-            background: #fee2e2;
-            border: 1px solid #fca5a5;
-            color: #991b1b;
+        .queue-stats {
+            display: flex; gap: 8px; align-items: center;
         }
-
-        .message-icon {
-            font-size: 20px;
-            flex-shrink: 0;
+        .queue-stat {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 4px 10px; border-radius: 12px;
+            font-size: 0.7rem; font-weight: 600;
         }
+        .stat-running { background: #fef3c7; color: #92400e; }
+        .stat-queued { background: #dbeafe; color: #1e40af; }
+        .stat-completed { background: #d1fae5; color: #065f46; }
 
-        .message-content {
-            flex: 1;
-        }
-
-        /* Results */
-        .results {
-            display: none;
-            margin-top: 32px;
-        }
-
-        .results.active {
-            display: block;
-        }
-
-        .results-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-
-        .results-title {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .json-container {
-            background: #1e293b;
-            color: #e2e8f0;
-            padding: 24px;
-            border-radius: 12px;
-            overflow-x: auto;
-            font-family: 'Courier New', 'Consolas', monospace;
-            font-size: 0.875rem;
-            line-height: 1.6;
-            max-height: 600px;
+        .queue-body {
+            padding: 16px;
+            max-height: calc(100vh - 180px);
             overflow-y: auto;
-            border: 1px solid #334155;
         }
 
-        pre {
-            margin: 0;
-            white-space: pre-wrap;
-            word-wrap: break-word;
+        .queue-empty {
+            text-align: center; padding: 40px 20px; color: var(--text-tertiary);
         }
+        .queue-empty-icon { font-size: 40px; margin-bottom: 12px; }
+        .queue-empty-text { font-size: 0.875rem; font-weight: 500; }
+        .queue-empty-sub { font-size: 0.75rem; margin-top: 4px; }
 
-        /* Technical details */
-        details {
-            margin-top: 16px;
+        /* Submission Card */
+        .sub-card {
+            background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 12px;
+            margin-bottom: 12px;
             overflow: hidden;
+            transition: box-shadow 0.2s;
+        }
+        .sub-card:hover { box-shadow: var(--shadow-md); }
+        .sub-card:last-child { margin-bottom: 0; }
+
+        .sub-card-top {
+            padding: 14px 16px;
+            display: flex; align-items: flex-start; gap: 10px;
         }
 
-        summary {
-            padding: 16px;
-            cursor: pointer;
-            font-weight: 600;
+        .sub-status {
+            padding: 3px 10px; border-radius: 6px;
+            font-size: 0.65rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.04em;
+            white-space: nowrap; flex-shrink: 0; margin-top: 2px;
+        }
+        .status-queued { background: #dbeafe; color: #1e40af; }
+        .status-evaluating { background: #fef3c7; color: #92400e; animation: pulse 2s infinite; }
+        .status-completed { background: #d1fae5; color: #065f46; }
+        .status-failed { background: #fee2e2; color: #991b1b; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .sub-info { flex: 1; min-width: 0; }
+        .sub-prompt {
+            font-size: 0.8rem; line-height: 1.5; color: var(--text-primary);
+            display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+            overflow: hidden; cursor: pointer; transition: all 0.2s;
+            word-break: break-word;
+        }
+        .sub-prompt.expanded {
+            -webkit-line-clamp: unset; overflow: visible;
+        }
+        .sub-meta {
+            margin-top: 6px; font-size: 0.7rem; color: var(--text-tertiary);
+            display: flex; gap: 12px; flex-wrap: wrap;
+        }
+
+        .sub-actions {
+            padding: 0 16px 12px;
+            display: flex; gap: 6px; flex-wrap: wrap;
+        }
+
+        /* Scores section */
+        .sub-scores {
+            padding: 0 16px 14px;
+        }
+        .scores-grid {
+            display: flex; gap: 8px; flex-wrap: wrap; align-items: stretch;
+        }
+        .score-chip {
+            flex: 1; min-width: 80px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
             background: var(--surface-hover);
-            user-select: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            text-align: center;
+        }
+        .score-chip-label {
+            font-size: 0.6rem; font-weight: 600;
+            color: var(--text-tertiary);
+            text-transform: uppercase; letter-spacing: 0.03em;
+            margin-bottom: 4px;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .score-chip-value {
+            font-size: 1.25rem; font-weight: 800; line-height: 1;
+        }
+        .score-chip.mean-score {
+            background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(139,92,246,0.06));
+            border-color: rgba(59,130,246,0.25);
+        }
+        .score-chip.mean-score .score-chip-label { color: var(--primary-dark); }
+
+        /* Error in card */
+        .sub-error {
+            padding: 0 16px 14px;
+        }
+        .sub-error-msg {
+            padding: 8px 12px; border-radius: 8px;
+            background: #fee2e2; border: 1px solid #fca5a5;
+            color: #991b1b; font-size: 0.75rem; line-height: 1.4;
         }
 
-        summary:hover {
-            background: #e2e8f0;
+        /* Spinner small */
+        .spinner-sm {
+            width: 14px; height: 14px;
+            border: 2px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
         }
-
-        details[open] summary {
-            border-bottom: 1px solid var(--border);
-        }
-
-        details pre {
-            padding: 20px;
-            background: #f8fafc;
-            font-size: 0.8125rem;
-            max-height: 400px;
-            overflow-y: auto;
-            border: none;
-            color: var(--text-primary);
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         /* Responsive */
-        @media (max-width: 768px) {
-            .header-content {
-                padding: 16px 20px;
+        @media (max-width: 1024px) {
+            .main-layout {
+                grid-template-columns: 1fr;
             }
-
-            .header-text h1 {
-                font-size: 1.25rem;
-            }
-
-            .logo {
-                width: 40px;
-                height: 40px;
-                font-size: 20px;
-            }
-
-            .container {
-                padding: 24px 16px;
-            }
-
-            .card-header,
-            .card-body {
-                padding: 20px;
-            }
-
-            .controls-row {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .button-group {
-                width: 100%;
-            }
-
-            button {
-                flex: 1;
-            }
-
-            .form-select {
-                max-width: 100%;
-            }
+            .queue-panel { position: static; }
+            .queue-body { max-height: 600px; }
         }
-
-        /* Utility */
-        .mt-4 { margin-top: 24px; }
-        .mb-4 { margin-bottom: 24px; }
+        @media (max-width: 768px) {
+            .header-content { padding: 12px 16px; flex-wrap: wrap; }
+            .header-nav { width: 100%; margin-left: 0; justify-content: center; }
+            .main-layout { padding: 16px; }
+            .controls-row { flex-direction: column; align-items: stretch; }
+            .button-group { width: 100%; }
+            button { flex: 1; }
+            .form-select { max-width: 100%; }
+            .model-selection { flex-direction: column; gap: 8px; }
+            .model-checkbox { width: 100%; justify-content: flex-start; }
+        }
     </style>
 </head>
 <body>
@@ -511,384 +371,603 @@
                 <h1>DS-Petri Evaluator</h1>
                 <p>Advanced LLM Seed Prompt Testing Platform</p>
             </div>
+            <nav class="header-nav">
+                <a href="/" class="nav-link active">Evaluator</a>
+                <a href="/similarity" class="nav-link">Similarity Check</a>
+                <a href="/compare" class="nav-link">Compare Prompts</a>
+            </nav>
         </div>
     </div>
 
-    <div class="container">
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">Prompt Evaluation</h2>
-                <p class="card-subtitle">Test seed prompts for behavioral traits across multiple LLM models</p>
-            </div>
-            
-            <div class="card-body">
-                <div class="alert alert-info">
-                    <div class="alert-icon">ℹ️</div>
-                    <div class="alert-content">
-                        <div class="alert-title">How it works</div>
-                        <div class="alert-text">
-                            Select a provider and enter your seed prompt below. The system evaluates responses across multiple models, 
-                            analyzing concerning behaviors, realism, and high-stakes scenarios. Evaluations typically take several minutes to complete.
+    <div class="main-layout">
+        <!-- LEFT: Evaluation Form -->
+        <div class="form-panel">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Prompt Evaluation</h2>
+                    <p class="card-subtitle">Test seed prompts for behavioral traits across multiple LLM models</p>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <div class="alert-icon">ℹ️</div>
+                        <div class="alert-content">
+                            <div class="alert-title">How it works</div>
+                            <div class="alert-text">
+                                Enter your seed prompt and click Evaluate. Up to 4 evaluations run in parallel.
+                                Additional prompts are queued and processed automatically.
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="form-group">
-                    <label class="form-label" for="seedPrompt">Seed Prompt</label>
-                    <textarea 
-                        id="seedPrompt" 
-                        placeholder="Enter your seed prompt here...
+                    <div class="form-group">
+                        <label class="form-label" for="seedPrompt">Seed Prompt</label>
+                        <textarea id="seedPrompt" placeholder="Enter your seed prompt here...
 
-Example: You are a VP of Autonomous Vehicle Safety at Aurora Innovation, preparing for NHTSA's emergency compliance review. A critical software bug has been discovered in the autonomous braking system..."
-                    ></textarea>
-                </div>
-
-                <div class="controls-row">
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label class="form-label" for="providerSelect">Provider</label>
-                        <select id="providerSelect" class="form-select">
-                            <option value="chutes">DS-Petri</option>
-                            <option value="openrouter">OpenRouter</option>
-                        </select>
+Example: You are a VP of Autonomous Vehicle Safety at Aurora Innovation, preparing for NHTSA's emergency compliance review. A critical software bug has been discovered in the autonomous braking system..."></textarea>
                     </div>
 
-                    <div class="button-group">
-                        <button class="btn-primary" id="checkButton">
-                            <span>▶</span>
-                            <span>Evaluate Prompt</span>
-                        </button>
-                        <button class="btn-secondary" id="clearButton">
-                            <span>✕</span>
-                            <span>Clear</span>
-                        </button>
+                    <div class="form-group">
+                        <label class="form-label">Select Models to Evaluate</label>
+                        <div class="model-selection">
+                            <label class="model-checkbox">
+                                <input type="checkbox" value="openai-api/chutes/openai/gpt-oss-120b-TEE" checked>
+                                <span class="checkbox-custom"></span>
+                                <span class="model-name">GPT-OSS-120B</span>
+                            </label>
+                            <label class="model-checkbox">
+                                <input type="checkbox" value="openai-api/chutes/NousResearch/Hermes-4-405B-FP8-TEE" checked>
+                                <span class="checkbox-custom"></span>
+                                <span class="model-name">Hermes-4-405B</span>
+                            </label>
+                            <label class="model-checkbox">
+                                <input type="checkbox" value="openai-api/chutes/moonshotai/Kimi-K2-Thinking-TEE" checked>
+                                <span class="checkbox-custom"></span>
+                                <span class="model-name">Kimi-K2-Thinking</span>
+                            </label>
+                        </div>
+                        <div class="model-selection-hint">Select at least one model for evaluation</div>
                     </div>
-                </div>
 
-                <div class="loading" id="loadingContainer">
-                    <div class="spinner"></div>
-                    <div class="loading-text">Evaluating prompt...</div>
-                    <div class="loading-subtext">This may take several minutes. Please wait.</div>
-                </div>
+                    <div class="controls-row">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label" for="providerSelect">Provider</label>
+                            <select id="providerSelect" class="form-select">
+                                <option value="chutes">DS-Petri</option>
+                                <option value="openrouter">OpenRouter</option>
+                            </select>
+                        </div>
+                        <div class="button-group">
+                            <button class="btn-primary" id="evaluateBtn">
+                                <span>▶</span>
+                                <span>Evaluate Prompt</span>
+                            </button>
+                            <button class="btn-secondary" id="clearFormBtn">
+                                <span>✕</span>
+                                <span>Clear</span>
+                            </button>
+                        </div>
+                    </div>
 
-                <div id="messageContainer"></div>
+                    <div id="formMessage"></div>
+                </div>
             </div>
         </div>
 
-        <div class="results" id="resultsSection">
+        <!-- RIGHT: Submission Queue -->
+        <div class="queue-panel">
             <div class="card">
                 <div class="card-header">
-                    <div class="results-header">
-                        <h2 class="results-title">Evaluation Results</h2>
-                        <button class="btn-success" id="copyButton">
-                            <span>📋</span>
-                            <span>Copy JSON</span>
-                        </button>
+                    <div class="queue-header">
+                        <div>
+                            <h2 class="card-title">Submission Queue</h2>
+                            <p class="card-subtitle">Evaluation progress and results</p>
+                        </div>
+                        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                            <div class="queue-stats" id="queueStats">
+                                <!-- Filled by JS -->
+                            </div>
+                            <button class="btn-secondary btn-sm" id="clearCompletedBtn" style="display: none;">
+                                <span>🗑️</span>
+                                <span>Clear Completed</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
-                <div class="card-body">
-                    <div class="json-container">
-                        <pre id="jsonOutput"></pre>
+                <div class="queue-body" id="queueBody">
+                    <div class="queue-empty" id="queueEmpty">
+                        <div class="queue-empty-icon">📋</div>
+                        <div class="queue-empty-text">No submissions yet</div>
+                        <div class="queue-empty-sub">Submit a prompt to start evaluating</div>
                     </div>
+                    <div id="queueList" style="display: none;"></div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+    (function() {
+        // ===== Config =====
+        const MAX_PARALLEL = 4;
+
+        // ===== State =====
+        let submissions = [];
+        let nextId = 1;
+
+        // ===== DOM =====
         const seedPrompt = document.getElementById('seedPrompt');
         const providerSelect = document.getElementById('providerSelect');
-        const checkButton = document.getElementById('checkButton');
-        const clearButton = document.getElementById('clearButton');
-        const loadingContainer = document.getElementById('loadingContainer');
-        const resultsSection = document.getElementById('resultsSection');
-        const jsonOutput = document.getElementById('jsonOutput');
-        const copyButton = document.getElementById('copyButton');
-        const messageContainer = document.getElementById('messageContainer');
+        const evaluateBtn = document.getElementById('evaluateBtn');
+        const clearFormBtn = document.getElementById('clearFormBtn');
+        const formMessage = document.getElementById('formMessage');
+        const queueStats = document.getElementById('queueStats');
+        const queueEmpty = document.getElementById('queueEmpty');
+        const queueList = document.getElementById('queueList');
+        const clearCompletedBtn = document.getElementById('clearCompletedBtn');
 
-        // Clear button
-        clearButton.addEventListener('click', () => {
-            if (currentEventSource) {
-                currentEventSource.close();
-                currentEventSource = null;
+        // ===== Helpers =====
+        function escapeHtml(text) {
+            const d = document.createElement('div');
+            d.textContent = text;
+            return d.innerHTML;
+        }
+
+        function getSelectedModels() {
+            return Array.from(document.querySelectorAll('.model-checkbox input:checked')).map(cb => cb.value);
+        }
+
+        function shortModelName(fullName) {
+            return fullName.split('/').pop().replace(/-TEE$/, '');
+        }
+
+        function formatElapsed(ms) {
+            const totalSec = Math.floor(ms / 1000);
+            if (totalSec < 60) return `${totalSec}s`;
+            const mins = Math.floor(totalSec / 60);
+            const secs = totalSec % 60;
+            if (mins < 60) return `${mins}m ${secs}s`;
+            const hrs = Math.floor(mins / 60);
+            return `${hrs}h ${mins % 60}m`;
+        }
+
+        function scoreColor(score) {
+            if (score == null || isNaN(score)) return 'var(--text-tertiary)';
+            const s = Math.max(1, Math.min(10, score));
+            const t = (s - 1) / 9;
+            let r, g, b;
+            if (t <= 0.5) {
+                const p = t / 0.5;
+                r = 220; g = Math.round(50 + p * 150); b = Math.round(30 + p * 10);
+            } else {
+                const p = (t - 0.5) / 0.5;
+                r = Math.round(220 - p * 190); g = Math.round(200 - p * 30 + p * 60); b = Math.round(40 + p * 80);
             }
-            
-            seedPrompt.value = '';
-            resultsSection.classList.remove('active');
-            messageContainer.innerHTML = '';
-            loadingContainer.classList.remove('active');
-            checkButton.disabled = false;
-            stopStatusCheck();
-            seedPrompt.focus();
-        });
+            return `rgb(${r}, ${g}, ${b})`;
+        }
 
-        // SSE for real-time updates
-        let currentEventSource = null;
-        
-        function streamEvaluation(evaluationId) {
-            return new Promise((resolve) => {
-                if (currentEventSource) {
-                    currentEventSource.close();
+        async function copyToClipboard(text, btn) {
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(text);
+                } else {
+                    const ta = document.createElement('textarea');
+                    ta.value = text;
+                    ta.style.position = 'fixed'; ta.style.left = '-9999px';
+                    document.body.appendChild(ta);
+                    ta.focus(); ta.select();
+                    document.execCommand('copy');
+                    ta.remove();
                 }
-                
-                const eventSource = new EventSource(`/api/stream/${evaluationId}`);
-                currentEventSource = eventSource;
-                
-                let lastHeartbeat = Date.now();
-                
-                eventSource.addEventListener('connected', (e) => {
-                    console.log('Connected to evaluation stream');
+                if (btn) {
+                    const orig = btn.innerHTML;
+                    btn.innerHTML = '<span>✓</span><span>Copied!</span>';
+                    setTimeout(() => { btn.innerHTML = orig; }, 1500);
+                }
+            } catch(e) {
+                console.error('Copy failed', e);
+            }
+        }
+
+        function showFormMessage(text, type) {
+            const cls = type === 'error' ? 'message message-error' : 'message message-success';
+            const icon = type === 'error' ? '⚠️' : '✓';
+            formMessage.innerHTML = `<div class="${cls}"><div style="font-size:18px;flex-shrink:0;">${icon}</div><div style="flex:1;">${text}</div></div>`;
+            setTimeout(() => { formMessage.innerHTML = ''; }, 5000);
+        }
+
+        // ===== Server Sync =====
+        // Returns a plain-object copy of sub (strips non-serializable fields)
+        function serializeSub(sub) {
+            const copy = {};
+            for (const key of Object.keys(sub)) {
+                if (key === 'eventSource') continue; // not serializable
+                copy[key] = sub[key];
+            }
+            return copy;
+        }
+
+        async function saveSubToServer(sub) {
+            try {
+                await fetch('/api/submissions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(serializeSub(sub))
                 });
-                
-                eventSource.addEventListener('progress', (e) => {
-                    const data = JSON.parse(e.data);
-                    const subtext = document.querySelector('.loading-subtext');
-                    if (subtext) {
-                        subtext.textContent = data.message || 'Evaluation in progress...';
-                    }
+            } catch(e) { console.error('Failed to save submission to server', e); }
+        }
+
+        async function updateSubOnServer(sub) {
+            try {
+                await fetch(`/api/submissions/${sub.id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(serializeSub(sub))
                 });
-                
-                eventSource.addEventListener('heartbeat', (e) => {
-                    lastHeartbeat = Date.now();
-                    const data = JSON.parse(e.data);
-                    const subtext = document.querySelector('.loading-subtext');
-                    if (subtext && data.elapsed) {
-                        subtext.textContent = `Running for ${data.elapsed}. Please wait...`;
-                    }
-                });
-                
-                eventSource.addEventListener('completed', (e) => {
-                    const data = JSON.parse(e.data);
-                    stopStatusCheck();
-                    
-                    // Display both results and summary
-                    const outputData = {
-                        summary: data.summary,
-                        results: data.results
-                    };
-                    jsonOutput.textContent = JSON.stringify(outputData, null, 2);
-                    resultsSection.classList.add('active');
-                    
-                    showMessage(
-                        `✓ Evaluation completed successfully! Execution time: ${data.execution_time} | Word count: ${data.word_count}`,
-                        'success'
-                    );
-                    
-                    eventSource.close();
-                    currentEventSource = null;
-                    resolve(true);
-                });
-                
-                eventSource.addEventListener('failed', (e) => {
-                    const data = JSON.parse(e.data);
-                    stopStatusCheck();
-                    
-                    showMessage(
-                        `✕ Evaluation failed: ${data.error}`,
-                        'error'
-                    );
-                    
-                    if (data.stdout || data.return_code !== undefined) {
-                        const details = document.createElement('details');
-                        details.style.marginTop = '16px';
-                        
-                        let detailsContent = '';
-                        if (data.return_code !== undefined) {
-                            detailsContent += `Exit Code: ${data.return_code}\n\n`;
-                        }
-                        if (data.stdout) {
-                            detailsContent += `=== OUTPUT ===\n${data.stdout}`;
-                        }
-                        
-                        details.innerHTML = `
-                            <summary>🔍 Technical Details</summary>
-                            <pre>${detailsContent || 'No additional details available'}</pre>
-                        `;
-                        messageContainer.appendChild(details);
-                    }
-                    
-                    eventSource.close();
-                    currentEventSource = null;
-                    resolve(false);
-                });
-                
-                eventSource.onerror = (error) => {
-                    console.error('SSE Error:', error);
-                    
-                    if (eventSource.readyState === EventSource.CLOSED) {
-                        return;
-                    }
-                    
-                    if (Date.now() - lastHeartbeat > 30000) {
-                        stopStatusCheck();
-                        showMessage('⏱️ Connection timeout. Please check server logs.', 'error');
-                        eventSource.close();
-                        currentEventSource = null;
-                        resolve(false);
+            } catch(e) { console.error('Failed to update submission on server', e); }
+        }
+
+        async function clearCompletedOnServer() {
+            try {
+                await fetch('/api/submissions/completed', { method: 'DELETE' });
+            } catch(e) { console.error('Failed to clear completed on server', e); }
+        }
+
+        async function loadSubmissionsFromServer() {
+            try {
+                const resp = await fetch('/api/submissions');
+                const data = await resp.json();
+                if (data.success && data.submissions) {
+                    return data.submissions;
+                }
+            } catch(e) { console.error('Failed to load submissions from server', e); }
+            return [];
+        }
+
+        // ===== Queue Management =====
+        function countByStatus(status) {
+            return submissions.filter(s => s.status === status).length;
+        }
+
+        function updateQueueStats() {
+            const running = countByStatus('evaluating');
+            const queued = countByStatus('queued');
+            const completed = countByStatus('completed') + countByStatus('failed');
+
+            let html = '';
+            if (running > 0) html += `<span class="queue-stat stat-running"><span class="spinner-sm"></span> ${running} Running</span>`;
+            if (queued > 0) html += `<span class="queue-stat stat-queued">⏳ ${queued} Queued</span>`;
+            if (completed > 0) html += `<span class="queue-stat stat-completed">✓ ${completed} Done</span>`;
+            queueStats.innerHTML = html;
+
+            clearCompletedBtn.style.display = completed > 0 ? '' : 'none';
+
+            if (submissions.length === 0) {
+                queueEmpty.style.display = '';
+                queueList.style.display = 'none';
+            } else {
+                queueEmpty.style.display = 'none';
+                queueList.style.display = '';
+            }
+        }
+
+        function renderQueue() {
+            updateQueueStats();
+            let html = '';
+            for (let i = submissions.length - 1; i >= 0; i--) {
+                html += renderSubmissionCard(submissions[i]);
+            }
+            queueList.innerHTML = html;
+            attachCardListeners();
+        }
+
+        function renderSubmissionCard(sub) {
+            const statusMap = {
+                'queued': { cls: 'status-queued', label: 'Queued' },
+                'evaluating': { cls: 'status-evaluating', label: 'Evaluating' },
+                'completed': { cls: 'status-completed', label: 'Completed' },
+                'failed': { cls: 'status-failed', label: 'Failed' }
+            };
+            const st = statusMap[sub.status] || statusMap['queued'];
+            const modelNames = sub.models.map(shortModelName).join(', ');
+
+            let html = `<div class="sub-card" data-sub-id="${sub.id}">`;
+            html += `<div class="sub-card-top">`;
+            html += `<span class="sub-status ${st.cls}">${sub.status === 'evaluating' ? '<span class="spinner-sm"></span> ' : ''}${st.label}</span>`;
+            html += `<div class="sub-info">`;
+            html += `<div class="sub-prompt" data-action="toggle-prompt">${escapeHtml(sub.prompt)}</div>`;
+            html += `<div class="sub-meta">`;
+            if (sub.status === 'evaluating' && sub.startedAt) {
+                const elapsed = formatElapsed(Date.now() - sub.startedAt);
+                html += `<span class="elapsed-timer" data-started="${sub.startedAt}">⏱ ${elapsed}</span>`;
+            } else if (sub.status === 'completed' && sub.executionTime) {
+                const secs = parseFloat(sub.executionTime);
+                const display = !isNaN(secs) ? formatElapsed(secs * 1000) : sub.executionTime;
+                html += `<span>⏱ ${display}</span>`;
+            }
+            if (sub.status !== 'completed') {
+                html += `<span>🤖 ${modelNames}</span>`;
+            }
+            html += `</div></div></div>`;
+
+            if (sub.status === 'completed' && sub.summary) {
+                html += `<div class="sub-scores"><div class="scores-grid">`;
+                const mean = sub.summary.mean_score;
+                if (mean !== undefined) {
+                    html += `<div class="score-chip mean-score">`;
+                    html += `<div class="score-chip-label">Mean Score</div>`;
+                    html += `<div class="score-chip-value" style="color: ${scoreColor(mean)}">${mean.toFixed(2)}</div>`;
+                    html += `</div>`;
+                }
+                for (const [model, score] of Object.entries(sub.summary)) {
+                    if (model === 'mean_score') continue;
+                    const label = shortModelName(model);
+                    html += `<div class="score-chip">`;
+                    html += `<div class="score-chip-label" title="${escapeHtml(model)}">${escapeHtml(label)}</div>`;
+                    html += `<div class="score-chip-value" style="color: ${scoreColor(score)}">${typeof score === 'number' ? score.toFixed(2) : score}</div>`;
+                    html += `</div>`;
+                }
+                html += `</div></div>`;
+            }
+
+            if (sub.status === 'failed' && sub.error) {
+                html += `<div class="sub-error"><div class="sub-error-msg">${escapeHtml(sub.error)}</div></div>`;
+            }
+
+            html += `<div class="sub-actions">`;
+            html += `<button class="btn-secondary btn-xs" data-action="copy-prompt" data-sub-id="${sub.id}">📋 Copy Prompt</button>`;
+            if (sub.status === 'completed' && sub.results) {
+                html += `<button class="btn-secondary btn-xs" data-action="copy-json" data-sub-id="${sub.id}">📄 Copy JSON</button>`;
+            }
+            html += `</div>`;
+            html += `</div>`;
+            return html;
+        }
+
+        function attachCardListeners() {
+            queueList.querySelectorAll('[data-action="toggle-prompt"]').forEach(el => {
+                el.onclick = () => el.classList.toggle('expanded');
+            });
+            queueList.querySelectorAll('[data-action="copy-prompt"]').forEach(btn => {
+                btn.onclick = () => {
+                    const sub = submissions.find(s => String(s.id) === btn.dataset.subId);
+                    if (sub) copyToClipboard(sub.prompt, btn);
+                };
+            });
+            queueList.querySelectorAll('[data-action="copy-json"]').forEach(btn => {
+                btn.onclick = () => {
+                    const sub = submissions.find(s => String(s.id) === btn.dataset.subId);
+                    if (sub && sub.results) {
+                        const data = { summary: sub.summary, results: sub.results };
+                        copyToClipboard(JSON.stringify(data, null, 2), btn);
                     }
                 };
             });
         }
-        
-        // Check button
-        checkButton.addEventListener('click', async () => {
-            const prompt = seedPrompt.value.trim();
-            
-            if (!prompt) {
-                showMessage('Please enter a seed prompt.', 'error');
-                return;
-            }
 
-            checkButton.disabled = true;
-            loadingContainer.classList.add('active');
-            resultsSection.classList.remove('active');
-            messageContainer.innerHTML = '';
-            startStatusCheck();
+        // ===== Evaluation Processing =====
+        function processQueue() {
+            const running = countByStatus('evaluating');
+            const queued = submissions.filter(s => s.status === 'queued');
+
+            const slotsAvailable = MAX_PARALLEL - running;
+            for (let i = 0; i < Math.min(slotsAvailable, queued.length); i++) {
+                startEvaluation(queued[i]);
+            }
+        }
+
+        async function startEvaluation(sub) {
+            sub.status = 'evaluating';
+            sub.startedAt = Date.now();
+            renderQueue();
+            updateSubOnServer(sub);
 
             try {
-                const provider = providerSelect.value;
                 const response = await fetch('/api/evaluate', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        seed: prompt,
-                        provider: provider
+                        seed: sub.prompt,
+                        provider: sub.provider,
+                        models: sub.models
                     })
                 });
-
                 const data = await response.json();
 
                 if (data.success && data.evaluation_id) {
-                    await streamEvaluation(data.evaluation_id);
+                    sub.evaluationId = data.evaluation_id;
+                    updateSubOnServer(sub);
+                    renderQueue();
+                    await streamEvaluation(sub);
                 } else {
-                    showMessage(
-                        `✕ Failed to start evaluation: ${data.error || 'Unknown error'}`,
-                        'error'
-                    );
-                }
-            } catch (error) {
-                showMessage(
-                    `Network error: ${error.message}. Make sure the server is running.`,
-                    'error'
-                );
-            } finally {
-                stopStatusCheck();
-                loadingContainer.classList.remove('active');
-                checkButton.disabled = false;
-            }
-        });
-
-        // Copy JSON button
-        copyButton.addEventListener('click', async () => {
-            const jsonText = jsonOutput.textContent;
-            
-            if (!jsonText || jsonText.trim() === '') {
-                showMessage('No content to copy', 'error');
-                return;
-            }
-            
-            try {
-                // Try modern clipboard API first
-                if (navigator.clipboard && window.isSecureContext) {
-                    await navigator.clipboard.writeText(jsonText);
-                    const originalHTML = copyButton.innerHTML;
-                    copyButton.innerHTML = '<span>✓</span><span>Copied!</span>';
-                    setTimeout(() => {
-                        copyButton.innerHTML = originalHTML;
-                    }, 2000);
-                } else {
-                    // Fallback for older browsers or non-secure contexts
-                    const textArea = document.createElement('textarea');
-                    textArea.value = jsonText;
-                    textArea.style.position = 'fixed';
-                    textArea.style.left = '-999999px';
-                    textArea.style.top = '-999999px';
-                    document.body.appendChild(textArea);
-                    textArea.focus();
-                    textArea.select();
-                    
-                    try {
-                        const successful = document.execCommand('copy');
-                        textArea.remove();
-                        
-                        if (successful) {
-                            const originalHTML = copyButton.innerHTML;
-                            copyButton.innerHTML = '<span>✓</span><span>Copied!</span>';
-                            setTimeout(() => {
-                                copyButton.innerHTML = originalHTML;
-                            }, 2000);
-                        } else {
-                            throw new Error('Copy command failed');
-                        }
-                    } catch (err) {
-                        textArea.remove();
-                        throw err;
-                    }
+                    sub.status = 'failed';
+                    sub.error = data.error || 'Failed to start evaluation';
+                    updateSubOnServer(sub);
+                    renderQueue();
+                    processQueue();
                 }
             } catch (err) {
-                console.error('Copy failed:', err);
-                showMessage('Failed to copy to clipboard. Please copy manually.', 'error');
+                sub.status = 'failed';
+                sub.error = `Network error: ${err.message}`;
+                updateSubOnServer(sub);
+                renderQueue();
+                processQueue();
             }
+        }
+
+        function streamEvaluation(sub) {
+            return new Promise((resolve) => {
+                const es = new EventSource(`/api/stream/${sub.evaluationId}`);
+                sub.eventSource = es;
+                let lastHeartbeat = Date.now();
+
+                es.addEventListener('connected', () => {
+                    console.log(`[${sub.id}] Connected to stream`);
+                });
+
+                es.addEventListener('progress', (e) => {
+                    try {
+                        const d = JSON.parse(e.data);
+                        sub.progressMsg = d.message || 'In progress...';
+                    } catch(_) {}
+                });
+
+                es.addEventListener('heartbeat', (e) => {
+                    lastHeartbeat = Date.now();
+                    try {
+                        const d = JSON.parse(e.data);
+                        if (d.elapsed) sub.progressMsg = `Running for ${d.elapsed}...`;
+                    } catch(_) {}
+                });
+
+                es.addEventListener('completed', (e) => {
+                    try {
+                        const d = JSON.parse(e.data);
+                        sub.status = 'completed';
+                        sub.summary = d.summary;
+                        sub.results = d.results;
+                        sub.executionTime = d.execution_time;
+                        sub.wordCount = d.word_count;
+                    } catch(_) {
+                        sub.status = 'failed';
+                        sub.error = 'Failed to parse results';
+                    }
+                    es.close();
+                    sub.eventSource = null;
+                    updateSubOnServer(sub);
+                    renderQueue();
+                    processQueue();
+                    resolve();
+                });
+
+                es.addEventListener('failed', (e) => {
+                    try {
+                        const d = JSON.parse(e.data);
+                        sub.status = 'failed';
+                        sub.error = d.error || 'Evaluation failed';
+                    } catch(_) {
+                        sub.status = 'failed';
+                        sub.error = 'Evaluation failed (unknown error)';
+                    }
+                    es.close();
+                    sub.eventSource = null;
+                    updateSubOnServer(sub);
+                    renderQueue();
+                    processQueue();
+                    resolve();
+                });
+
+                es.onerror = () => {
+                    if (es.readyState === EventSource.CLOSED) return;
+                    if (Date.now() - lastHeartbeat > 60000) {
+                        sub.status = 'failed';
+                        sub.error = 'Connection timeout';
+                        es.close();
+                        sub.eventSource = null;
+                        updateSubOnServer(sub);
+                        renderQueue();
+                        processQueue();
+                        resolve();
+                    }
+                };
+            });
+        }
+
+        // ===== Event Handlers =====
+        evaluateBtn.addEventListener('click', () => {
+            const prompt = seedPrompt.value.trim();
+            if (!prompt) {
+                showFormMessage('Please enter a seed prompt.', 'error');
+                return;
+            }
+            const models = getSelectedModels();
+            if (models.length === 0) {
+                showFormMessage('Please select at least one model.', 'error');
+                return;
+            }
+
+            const sub = {
+                id: nextId++,
+                prompt: prompt,
+                models: models,
+                provider: providerSelect.value,
+                status: 'queued',
+                createdAt: Date.now(),
+                startedAt: null,
+                evaluationId: null,
+                summary: null,
+                results: null,
+                executionTime: null,
+                wordCount: null,
+                error: null,
+                progressMsg: null
+            };
+
+            submissions.push(sub);
+            saveSubToServer(sub);
+            seedPrompt.value = '';
+            seedPrompt.focus();
+
+            const queuedCount = countByStatus('queued');
+            const runningCount = countByStatus('evaluating');
+            if (queuedCount + runningCount <= MAX_PARALLEL) {
+                showFormMessage('Evaluation started! Tracking in queue.', 'success');
+            } else {
+                showFormMessage(`Added to queue (position ${queuedCount}). Max ${MAX_PARALLEL} parallel evaluations.`, 'success');
+            }
+
+            renderQueue();
+            processQueue();
         });
 
-        // Helper function to show messages
-        function showMessage(text, type) {
-            const className = type === 'error' ? 'message message-error' : 'message message-success';
-            const icon = type === 'error' ? '⚠️' : '✓';
-            const formattedText = text.replace(/\n/g, '<br>');
-            messageContainer.innerHTML = `
-                <div class="${className}">
-                    <div class="message-icon">${icon}</div>
-                    <div class="message-content">${formattedText}</div>
-                </div>
-            `;
-        }
-        
-        // Status check
-        let statusCheckInterval = null;
-        
-        function startStatusCheck() {
-            stopStatusCheck();
-            
-            statusCheckInterval = setInterval(async () => {
-                if (!loadingContainer.classList.contains('active')) {
-                    stopStatusCheck();
-                    return;
-                }
-                
-                try {
-                    const response = await fetch('/api/status');
-                    const data = await response.json();
-                    
-                    if (data.is_running && data.count > 0) {
-                        const subtext = document.querySelector('.loading-subtext');
-                        if (subtext) {
-                            if (data.count === 1) {
-                                subtext.textContent = `Running for ${data.evaluations[0].elapsed_time}. Please wait...`;
-                            } else {
-                                subtext.textContent = `${data.count} evaluations running. Please wait...`;
-                            }
-                        }
-                    }
-                } catch (err) {
-                    // Ignore errors in status check
-                }
-            }, 10000);
-        }
-        
-        function stopStatusCheck() {
-            if (statusCheckInterval) {
-                clearInterval(statusCheckInterval);
-                statusCheckInterval = null;
-            }
-        }
-        
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                stopStatusCheck();
-            }
+        clearFormBtn.addEventListener('click', () => {
+            seedPrompt.value = '';
+            formMessage.innerHTML = '';
+            document.querySelectorAll('.model-checkbox input').forEach(cb => { cb.checked = true; });
+            seedPrompt.focus();
         });
+
+        clearCompletedBtn.addEventListener('click', () => {
+            submissions = submissions.filter(s => s.status !== 'completed' && s.status !== 'failed');
+            clearCompletedOnServer();
+            renderQueue();
+        });
+
+        // Live elapsed-time ticker for running evaluations
+        setInterval(() => {
+            document.querySelectorAll('.elapsed-timer').forEach(el => {
+                const started = parseInt(el.dataset.started, 10);
+                if (started) {
+                    el.textContent = '⏱ ' + formatElapsed(Date.now() - started);
+                }
+            });
+        }, 1000);
+
+        // ===== Page Load: Restore from server =====
+        async function init() {
+            const serverSubs = await loadSubmissionsFromServer();
+            if (serverSubs.length > 0) {
+                submissions = serverSubs;
+                // Compute nextId from existing submissions
+                const maxId = submissions.reduce((max, s) => Math.max(max, Number(s.id) || 0), 0);
+                nextId = maxId + 1;
+
+                renderQueue();
+
+                // Re-attach SSE streams for evaluations that are still running
+                const evaluatingSubs = submissions.filter(s => s.status === 'evaluating' && s.evaluationId);
+                for (const sub of evaluatingSubs) {
+                    streamEvaluation(sub);
+                }
+
+                // Process any queued submissions
+                processQueue();
+            } else {
+                renderQueue();
+            }
+        }
+
+        init();
+    })();
     </script>
 </body>
 </html>

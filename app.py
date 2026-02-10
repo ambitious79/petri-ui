@@ -30,9 +30,18 @@ import time
 import queue
 import concurrent.futures
 import logging
+import numpy as np
+import requests as http_requests
+from datetime import datetime, timezone
 from pathlib import Path
 from flask import Flask, request, jsonify, send_from_directory, Response, stream_with_context
 from flask_cors import CORS
+from pymongo import MongoClient
+from openai import OpenAI
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # ============================================================================
 # SELECTED METRICS CONFIGURATION
@@ -45,7 +54,7 @@ from flask_cors import CORS
 # disappointing, cooperation_with_human_misuse, unprompted_deception_toward_user,
 # and 30+ more dimensions. See astro-petri documentation for full list.
 SELECTED_METRICS = [
-    'unprompted_leaking',
+    'input_hallucination',
     # 'concerning',
     # 'disappointing',
     # 'cooperation_with_human_misuse',
@@ -55,6 +64,267 @@ SELECTED_METRICS = [
 
 app = Flask(__name__, static_folder='static')
 CORS(app)  # Enable CORS for API calls
+
+# ============================================================================
+# MONGODB & EMBEDDING CONFIGURATION
+# ============================================================================
+# MongoDB connection for seed instruction storage and similarity search.
+# Set MONGODB_URI environment variable or it defaults to localhost.
+MONGODB_URI = os.environ.get('MONGODB_URI', 'mongodb://localhost:27017')
+MONGODB_DB_NAME = os.environ.get('MONGODB_DB_NAME', 'petri_ui')
+MONGODB_COLLECTION = 'seed_instructions'
+
+# Initialize MongoDB client (lazy connection)
+mongo_client = None
+mongo_db = None
+mongo_collection = None
+
+def get_mongo_collection():
+    """Get MongoDB collection, initializing connection if needed."""
+    global mongo_client, mongo_db, mongo_collection
+    if mongo_collection is None:
+        mongo_client = MongoClient(MONGODB_URI, serverSelectionTimeoutMS=5000)
+        mongo_db = mongo_client[MONGODB_DB_NAME]
+        mongo_collection = mongo_db[MONGODB_COLLECTION]
+        # Create text index on instruction field for text search
+        mongo_collection.create_index([("instruction", 1)], unique=True)
+    return mongo_collection
+
+# Initialize OpenAI client for embeddings
+# Set OPENAI_API_KEY environment variable (required)
+# Optionally set OPENAI_BASE_URL for custom endpoints
+OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '')
+OPENAI_BASE_URL = os.environ.get('OPENAI_BASE_URL', None)
+EMBEDDING_MODEL = os.environ.get('EMBEDDING_MODEL', 'text-embedding-3-small')
+
+if OPENAI_API_KEY:
+    openai_client = OpenAI(
+        api_key=OPENAI_API_KEY,
+        base_url=OPENAI_BASE_URL
+    ) if OPENAI_BASE_URL else OpenAI(api_key=OPENAI_API_KEY)
+    print(f"[INFO] OpenAI embedding client initialized (model: {EMBEDDING_MODEL})")
+else:
+    openai_client = None
+    print("[WARNING] OPENAI_API_KEY not set. Similarity check will not work until it is configured.")
+
+def compute_embedding(text: str) -> list:
+    """Compute embedding vector for a given text using OpenAI API."""
+    if openai_client is None:
+        raise RuntimeError("OpenAI API key not configured. Set OPENAI_API_KEY environment variable.")
+    response = openai_client.embeddings.create(
+        input=text,
+        model=EMBEDDING_MODEL
+    )
+    return response.data[0].embedding
+
+def cosine_similarity(vec_a, vec_b):
+    """Compute cosine similarity between two vectors."""
+    a = np.array(vec_a)
+    b = np.array(vec_b)
+    dot = np.dot(a, b)
+    norm_a = np.linalg.norm(a)
+    norm_b = np.linalg.norm(b)
+    if norm_a == 0 or norm_b == 0:
+        return 0.0
+    return float(dot / (norm_a * norm_b))
+
+# ============================================================================
+# SCHEDULED SEED DOWNLOAD (Daily at 12:10 AM UTC)
+# ============================================================================
+TRISHOOL_API_BASE = "https://api.trishool.ai/api/v1"
+TARGET_SETS_URL = f"{TRISHOOL_API_BASE}/target-sets/list"
+SUBMISSIONS_URL = f"{TRISHOOL_API_BASE}/submissions/"
+SUBMISSIONS_PAGE_LIMIT = 100
+
+
+def fetch_target_sets_api():
+    """Fetch all target sets from the Trishool API."""
+    response = http_requests.get(TARGET_SETS_URL, timeout=30)
+    response.raise_for_status()
+    return response.json().get('target_sets', [])
+
+
+def fetch_all_submissions_for_target(target_id):
+    """
+    Fetch all SUCCEEDED non-hidden submissions for a target set.
+    Paginates through results (max 100 per page).
+    """
+    all_submissions = []
+    page = 1
+    while True:
+        params = {
+            'target_id': target_id,
+            'submission_status': 'SUCCEEDED',
+            'page': page,
+            'limit': SUBMISSIONS_PAGE_LIMIT,
+        }
+        response = http_requests.get(SUBMISSIONS_URL, params=params, timeout=30)
+        response.raise_for_status()
+        data = response.json()
+        submissions = data.get('submissions', [])
+        total = data.get('total', 0)
+        if not submissions:
+            break
+        # Filter out Hidden seed prompts
+        non_hidden = [
+            s for s in submissions
+            if s.get('seed_prompt', '').strip().lower() != 'hidden'
+        ]
+        all_submissions.extend(non_hidden)
+        if page * SUBMISSIONS_PAGE_LIMIT >= total:
+            break
+        page += 1
+    return all_submissions
+
+
+def save_submissions_to_db(submissions, target_set_description):
+    """
+    Save submissions to MongoDB with embeddings. Skips duplicates.
+    Returns (saved_count, skipped_count, error_count).
+    """
+    collection = get_mongo_collection()
+    saved = 0
+    skipped = 0
+    errors = 0
+
+    for sub in submissions:
+        instruction = sub.get('seed_prompt', '').strip()
+        if not instruction:
+            skipped += 1
+            continue
+
+        # Skip if already exists
+        if collection.find_one({"instruction": instruction}):
+            skipped += 1
+            continue
+
+        try:
+            embedding = compute_embedding(instruction)
+            doc = {
+                "miner_hotkey": sub.get('miner_hotkey', ''),
+                "instruction": instruction,
+                "target_set": target_set_description,
+                "created_at": sub.get('created_at', ''),
+                "score": sub.get('mean_score', 0.0),
+                "embedding": embedding,
+            }
+            collection.insert_one(doc)
+            saved += 1
+        except Exception as e:
+            error_msg = str(e)
+            if 'duplicate key' in error_msg.lower() or 'E11000' in error_msg:
+                skipped += 1
+            else:
+                errors += 1
+                print(f"  [SCHEDULED] Error saving submission: {error_msg}")
+        time.sleep(0.05)  # Rate limit protection
+
+    return saved, skipped, errors
+
+
+def scheduled_seed_download():
+    """
+    Daily scheduled task: download seed instructions from the appropriate target set.
+    
+    Logic:
+    - Find the OPEN target set (current)
+    - If OPEN set has 0 non-hidden succeeded prompts → download from the previous target set
+    - If OPEN set has 1+ non-hidden succeeded prompts → download from the current OPEN set
+    - Save new entries to MongoDB with embeddings (skip duplicates)
+    """
+    print(f"\n[SCHEDULED] {'=' * 60}")
+    print(f"[SCHEDULED] Daily seed download started at {datetime.now(timezone.utc).isoformat()}")
+    print(f"[SCHEDULED] {'=' * 60}")
+
+    try:
+        # Fetch target sets
+        target_sets = fetch_target_sets_api()
+        if not target_sets:
+            print("[SCHEDULED] No target sets found.")
+            return
+
+        # Find the OPEN target set
+        open_set = None
+        open_set_index = None
+        for i, ts in enumerate(target_sets):
+            if ts.get('status', '').upper() == 'OPEN':
+                open_set = ts
+                open_set_index = i
+                break
+
+        if not open_set:
+            print("[SCHEDULED] No OPEN target set found. Skipping.")
+            return
+
+        print(f"[SCHEDULED] Current OPEN target set: {open_set['description']} (ID: {open_set['id']})")
+
+        # Check if current OPEN set has non-hidden succeeded submissions
+        current_submissions = fetch_all_submissions_for_target(open_set['id'])
+        print(f"[SCHEDULED] OPEN set has {len(current_submissions)} non-hidden succeeded submissions.")
+
+        target_to_download = None
+        if len(current_submissions) > 0:
+            # Download from the current OPEN target set
+            target_to_download = open_set
+            submissions_to_save = current_submissions
+            print(f"[SCHEDULED] Downloading from CURRENT set: {open_set['description']}")
+        else:
+            # Download from the previous target set (next in list, since list is newest-first)
+            if open_set_index is not None and open_set_index + 1 < len(target_sets):
+                prev_set = target_sets[open_set_index + 1]
+                target_to_download = prev_set
+                submissions_to_save = fetch_all_submissions_for_target(prev_set['id'])
+                print(f"[SCHEDULED] OPEN set empty. Downloading from PREVIOUS set: {prev_set['description']}")
+            else:
+                print("[SCHEDULED] No previous target set available. Skipping.")
+                return
+
+        if not submissions_to_save:
+            print(f"[SCHEDULED] No non-hidden submissions to save from '{target_to_download['description']}'.")
+            return
+
+        print(f"[SCHEDULED] Saving {len(submissions_to_save)} submissions...")
+        saved, skipped, errors = save_submissions_to_db(
+            submissions_to_save, target_to_download['description']
+        )
+        print(f"[SCHEDULED] Result - Saved: {saved}, Skipped: {skipped}, Errors: {errors}")
+
+    except Exception as e:
+        print(f"[SCHEDULED] Error during scheduled download: {str(e)}")
+
+    print(f"[SCHEDULED] {'=' * 60}\n")
+
+
+def run_daily_scheduler():
+    """
+    Background thread that runs scheduled_seed_download daily at 12:10 AM UTC.
+    """
+    import datetime as dt
+    while True:
+        now = dt.datetime.now(dt.timezone.utc)
+        # Calculate next 12:10 AM UTC
+        target_time = now.replace(hour=0, minute=10, second=0, microsecond=0)
+        if now >= target_time:
+            # Already past 12:10 today, schedule for tomorrow
+            target_time += dt.timedelta(days=1)
+
+        wait_seconds = (target_time - now).total_seconds()
+        print(f"[SCHEDULER] Next seed download scheduled at {target_time.isoformat()} UTC "
+              f"(in {wait_seconds/3600:.1f} hours)")
+
+        # Sleep until target time
+        time.sleep(wait_seconds)
+
+        # Run the download
+        try:
+            scheduled_seed_download()
+        except Exception as e:
+            print(f"[SCHEDULER] Unexpected error: {str(e)}")
+
+        # Small sleep to avoid double-triggering
+        time.sleep(60)
+
+# ============================================================================
 
 # Suppress harmless SSL/TLS and HTTP/2 protocol errors in logs
 class ProtocolErrorFilter(logging.Filter):
@@ -449,10 +719,11 @@ def run_single_model_evaluation(evaluation_id, target_model, seed_file, auditor_
                 if extracted_dir:
                     readable_dirs.append(str(extracted_dir))
             
+            # Define execution_log path before conditional so it's available in both branches
+            execution_log = log_dir / model_short_name / f"{evaluation_id}_execution.log"
+            
             if transcript_file:
                 parsed_data = parse_transcript_file(transcript_file)
-                
-                execution_log = log_dir / model_short_name / f"{evaluation_id}_execution.log"
                 
                 # Print score summary to execution log
                 scores = parsed_data.get("scores", {})
@@ -871,10 +1142,66 @@ DEFAULT_CONFIG = {
 }
 
 
+# ============================================================================
+# SUBMISSION HISTORY (in-memory, clears on server restart)
+# ============================================================================
+submission_history = {}  # id -> submission dict
+submission_history_lock = threading.Lock()
+
+
 @app.route('/')
 def index():
     """Serve the main HTML page."""
     return send_from_directory('static', 'index.html')
+
+
+@app.route('/api/submissions', methods=['GET'])
+def get_submissions():
+    """Return all submissions stored in server memory."""
+    with submission_history_lock:
+        subs = list(submission_history.values())
+    # Sort by createdAt ascending (oldest first, frontend reverses for display)
+    subs.sort(key=lambda s: s.get('createdAt', 0))
+    return jsonify({"success": True, "submissions": subs})
+
+
+@app.route('/api/submissions', methods=['POST'])
+def add_submission():
+    """Add a new submission to server-side history."""
+    data = request.get_json()
+    if not data or 'id' not in data:
+        return jsonify({"success": False, "error": "Missing submission data"}), 400
+    sub_id = str(data['id'])
+    with submission_history_lock:
+        submission_history[sub_id] = data
+    return jsonify({"success": True})
+
+
+@app.route('/api/submissions/<sub_id>', methods=['PATCH'])
+def update_submission(sub_id):
+    """Update an existing submission (status, results, etc.)."""
+    data = request.get_json()
+    if not data:
+        return jsonify({"success": False, "error": "Missing update data"}), 400
+    with submission_history_lock:
+        if sub_id in submission_history:
+            submission_history[sub_id].update(data)
+            return jsonify({"success": True})
+        else:
+            return jsonify({"success": False, "error": "Submission not found"}), 404
+
+
+@app.route('/api/submissions/completed', methods=['DELETE'])
+def clear_completed_submissions():
+    """Remove all completed and failed submissions from history."""
+    with submission_history_lock:
+        to_remove = [
+            sid for sid, s in submission_history.items()
+            if s.get('status') in ('completed', 'failed')
+        ]
+        for sid in to_remove:
+            del submission_history[sid]
+    return jsonify({"success": True, "removed": len(to_remove)})
 
 
 @app.route('/api/evaluate', methods=['POST'])
@@ -1007,13 +1334,27 @@ def stream_evaluation(evaluation_id):
     with active_evaluations_lock:
         if evaluation_id not in active_evaluations:
             return jsonify({"error": "Evaluation not found"}), 404
+        eval_snapshot = active_evaluations[evaluation_id].copy()
     
     def generate():
-        # Get the queue for this evaluation
+        # If evaluation already completed/failed, send the result immediately
+        if eval_snapshot.get("status") == "completed":
+            yield f"event: connected\ndata: {json.dumps({'message': 'Connected to evaluation stream'})}\n\n"
+            yield f"event: completed\ndata: {json.dumps({'status': 'completed', 'results': eval_snapshot.get('results'), 'summary': eval_snapshot.get('summary'), 'execution_time': eval_snapshot.get('execution_time'), 'word_count': eval_snapshot.get('word_count'), 'models_evaluated': len(eval_snapshot.get('results', {}))})}\n\n"
+            yield f"event: close\ndata: {json.dumps({})}\n\n"
+            return
+        
+        if eval_snapshot.get("status") == "failed":
+            yield f"event: connected\ndata: {json.dumps({'message': 'Connected to evaluation stream'})}\n\n"
+            yield f"event: failed\ndata: {json.dumps({'error': eval_snapshot.get('error', 'Evaluation failed')})}\n\n"
+            yield f"event: close\ndata: {json.dumps({})}\n\n"
+            return
+        
+        # For running evaluations, get or recreate the SSE queue
         with sse_queues_lock:
             if evaluation_id not in sse_queues:
-                yield f"event: error\ndata: {json.dumps({'error': 'Stream not available'})}\n\n"
-                return
+                # Recreate queue (e.g. after page refresh)
+                sse_queues[evaluation_id] = queue.Queue(maxsize=100)
             event_queue = sse_queues[evaluation_id]
         
         try:
@@ -1036,12 +1377,21 @@ def stream_evaluation(evaluation_id):
                         break
                         
                 except queue.Empty:
-                    # Send heartbeat to keep connection alive
+                    # Check if evaluation finished while we were waiting
                     with active_evaluations_lock:
                         if evaluation_id in active_evaluations:
                             eval_data = active_evaluations[evaluation_id]
-                            elapsed = int(time.time() - eval_data["start_time"])
-                            yield f"event: heartbeat\ndata: {json.dumps({'elapsed': f'{elapsed}s'})}\n\n"
+                            status = eval_data.get("status")
+                            
+                            if status == "completed":
+                                yield f"event: completed\ndata: {json.dumps({'status': 'completed', 'results': eval_data.get('results'), 'summary': eval_data.get('summary'), 'execution_time': eval_data.get('execution_time'), 'word_count': eval_data.get('word_count'), 'models_evaluated': len(eval_data.get('results', {}))})}\n\n"
+                                break
+                            elif status == "failed":
+                                yield f"event: failed\ndata: {json.dumps({'error': eval_data.get('error', 'Evaluation failed')})}\n\n"
+                                break
+                            else:
+                                elapsed = int(time.time() - eval_data["start_time"])
+                                yield f"event: heartbeat\ndata: {json.dumps({'elapsed': f'{elapsed}s'})}\n\n"
                         else:
                             break
                     
@@ -1238,6 +1588,175 @@ def update_selected_metrics():
         }), 500
 
 
+# ============================================================================
+# SIMILARITY CHECK ROUTES
+# ============================================================================
+
+@app.route('/similarity')
+def similarity_page():
+    """Serve the similarity check HTML page."""
+    return send_from_directory('static', 'similarity.html')
+
+
+@app.route('/api/similarity/check', methods=['POST'])
+def check_similarity():
+    """
+    Check similarity of input seed instruction against stored instructions.
+    
+    Expects JSON body:
+    {
+        "instruction": "Your seed instruction text..."
+    }
+    
+    Returns top 10 most similar seed instructions with similarity percentages.
+    """
+    try:
+        data = request.get_json()
+        
+        if not data or 'instruction' not in data:
+            return jsonify({
+                "success": False,
+                "error": "Missing 'instruction' field in request body"
+            }), 400
+        
+        instruction = data['instruction'].strip()
+        
+        if not instruction:
+            return jsonify({
+                "success": False,
+                "error": "Instruction cannot be empty"
+            }), 400
+        
+        # Compute embedding for the input instruction
+        input_embedding = compute_embedding(instruction)
+        
+        # Fetch all stored seed instructions with embeddings from MongoDB
+        collection = get_mongo_collection()
+        stored_instructions = list(collection.find(
+            {"embedding": {"$exists": True}},
+            {"instruction": 1, "embedding": 1, "miner_hotkey": 1,
+             "target_set": 1, "created_at": 1, "score": 1, "_id": 0}
+        ))
+        
+        if not stored_instructions:
+            return jsonify({
+                "success": True,
+                "results": [],
+                "message": "No seed instructions in database yet. Add some first.",
+                "total_in_db": 0
+            })
+        
+        # Compute similarity with each stored instruction
+        similarities = []
+        for doc in stored_instructions:
+            sim = cosine_similarity(input_embedding, doc['embedding'])
+            similarity_pct = round(sim * 100, 2)
+            similarities.append({
+                "instruction": doc['instruction'],
+                "miner_hotkey": doc.get('miner_hotkey', ''),
+                "target_set": doc.get('target_set', ''),
+                "created_at": doc.get('created_at', ''),
+                "score": doc.get('score', 0.0),
+                "similarity_percentage": similarity_pct
+            })
+        
+        # Sort by similarity (highest first) and take top 10
+        similarities.sort(key=lambda x: x['similarity_percentage'], reverse=True)
+        top_10 = similarities[:10]
+        
+        return jsonify({
+            "success": True,
+            "results": top_10,
+            "total_in_db": len(stored_instructions)
+        })
+    
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": f"Similarity check failed: {str(e)}"
+        }), 500
+
+
+@app.route('/api/similarity/count', methods=['GET'])
+def get_seed_count():
+    """Get the total count of seed instructions stored in the database."""
+    try:
+        collection = get_mongo_collection()
+        count = collection.count_documents({})
+        return jsonify({
+            "success": True,
+            "count": count
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+
+# ============================================================================
+# PROMPT COMPARE ROUTES
+# ============================================================================
+
+@app.route('/compare')
+def compare_page():
+    """Serve the prompt comparison HTML page."""
+    return send_from_directory('static', 'compare.html')
+
+
+@app.route('/api/similarity/compare', methods=['POST'])
+def compare_prompts():
+    """
+    Compare similarity between two prompts directly.
+    
+    Expects JSON body:
+    {
+        "prompt_a": "First prompt text...",
+        "prompt_b": "Second prompt text..."
+    }
+    
+    Returns similarity percentage.
+    """
+    try:
+        data = request.get_json()
+        
+        if not data or 'prompt_a' not in data or 'prompt_b' not in data:
+            return jsonify({
+                "success": False,
+                "error": "Both 'prompt_a' and 'prompt_b' fields are required"
+            }), 400
+        
+        prompt_a = data['prompt_a'].strip()
+        prompt_b = data['prompt_b'].strip()
+        
+        if not prompt_a or not prompt_b:
+            return jsonify({
+                "success": False,
+                "error": "Both prompts must be non-empty"
+            }), 400
+        
+        # Compute embeddings for both prompts
+        embedding_a = compute_embedding(prompt_a)
+        embedding_b = compute_embedding(prompt_b)
+        
+        # Compute cosine similarity
+        similarity = cosine_similarity(embedding_a, embedding_b)
+        similarity_pct = round(similarity * 100, 2)
+        
+        return jsonify({
+            "success": True,
+            "similarity_percentage": similarity_pct,
+            "prompt_a_length": len(prompt_a.split()),
+            "prompt_b_length": len(prompt_b.split())
+        })
+    
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": f"Comparison failed: {str(e)}"
+        }), 500
+
+
 if __name__ == '__main__':
     # Create output directory if it doesn't exist
     Path(DEFAULT_CONFIG['output_dir']).mkdir(parents=True, exist_ok=True)
@@ -1262,8 +1781,14 @@ if __name__ == '__main__':
     print(f"Max turns: {DEFAULT_CONFIG['max_turns']}")
     print(f"Mode: {'Development (Debug)' if debug_mode else 'Production'}")
     print(f"Real-time logs: Enabled")
+    print(f"Scheduled seed download: Daily at 00:10 UTC")
     print("=" * 80)
+    
+    # Start the daily scheduler in a background thread
+    scheduler_thread = threading.Thread(target=run_daily_scheduler, daemon=True)
+    scheduler_thread.start()
+    print("[SCHEDULER] Background scheduler started.")
     
     # Use debug=False for production (PM2)
     # Use debug=True only when running manually with --debug flag
-    app.run(host='0.0.0.0', port=5000, debug=debug_mode)
+    app.run(host='0.0.0.0', port=5005, debug=debug_mode)

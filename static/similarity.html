@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Similarity Check - DS-Petri Evaluator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --primary-light: #60a5fa;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --success-dark: #059669;
+            --error: #ef4444;
+            --error-dark: #dc2626;
+            --warning: #f59e0b;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --surface-hover: #f1f5f9;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --text-tertiary: #94a3b8;
+            --border: #e2e8f0;
+            --border-focus: #3b82f6;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Header */
+        .header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+            text-decoration: none;
+        }
+
+        .header-text h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .header-text p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .header-nav {
+            margin-left: auto;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .nav-link {
+            padding: 8px 16px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover {
+            color: var(--primary);
+            background: rgba(59, 130, 246, 0.08);
+        }
+
+        .nav-link.active {
+            color: var(--primary);
+            background: rgba(59, 130, 246, 0.1);
+            font-weight: 600;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 24px;
+        }
+
+        /* Card */
+        .card {
+            background: var(--surface);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .card-subtitle {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .card-body {
+            padding: 24px;
+        }
+
+        /* Alert */
+        .alert {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .alert-info {
+            background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%);
+            border: 1px solid #93c5fd;
+            color: #1e40af;
+        }
+
+        .alert-icon {
+            font-size: 20px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .alert-content {
+            flex: 1;
+        }
+
+        .alert-title {
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-bottom: 4px;
+        }
+
+        .alert-text {
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        /* Form */
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            font-size: 0.9375rem;
+            font-family: inherit;
+            color: var(--text-primary);
+            resize: vertical;
+            transition: all 0.2s;
+            line-height: 1.6;
+        }
+
+        textarea::placeholder {
+            color: var(--text-tertiary);
+        }
+
+        textarea:hover {
+            border-color: var(--primary-light);
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        /* Buttons */
+        .controls-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--primary-dark);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: var(--surface-hover);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        /* Loading */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 48px 24px;
+            background: var(--background);
+            border-radius: 12px;
+            margin-top: 24px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .loading-subtext {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        /* Message */
+        .message {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-top: 24px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .message-success {
+            background: #d1fae5;
+            border: 1px solid #6ee7b7;
+            color: #065f46;
+        }
+
+        .message-error {
+            background: #fee2e2;
+            border: 1px solid #fca5a5;
+            color: #991b1b;
+        }
+
+        .message-icon {
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .message-content {
+            flex: 1;
+        }
+
+        /* DB Stats */
+        .db-stats {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .stat-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(139, 92, 246, 0.06));
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 20px;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            color: var(--primary-dark);
+        }
+
+        .stat-badge .stat-icon {
+            font-size: 14px;
+        }
+
+        /* Results Table */
+        .results-section {
+            display: none;
+            margin-top: 32px;
+        }
+
+        .results-section.active {
+            display: block;
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .results-table thead {
+            background: var(--surface-hover);
+        }
+
+        .results-table th {
+            padding: 14px 20px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .results-table th.col-similarity {
+            text-align: center;
+            width: 140px;
+        }
+
+        .results-table th.col-score {
+            text-align: center;
+            width: 80px;
+        }
+
+        .results-table th.col-hotkey {
+            width: 140px;
+        }
+
+        .results-table th.col-target {
+            width: 160px;
+        }
+
+        .results-table th.col-date {
+            width: 110px;
+        }
+
+        .results-table td {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: top;
+            font-size: 0.875rem;
+        }
+
+        .results-table td.td-center {
+            text-align: center;
+        }
+
+        .results-table tbody tr {
+            transition: background 0.15s;
+        }
+
+        .results-table tbody tr:hover {
+            background: var(--surface-hover);
+        }
+
+        .results-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .rank-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.8125rem;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .rank-1 { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; }
+        .rank-2 { background: linear-gradient(135deg, #e2e8f0, #cbd5e1); color: #475569; }
+        .rank-3 { background: linear-gradient(135deg, #fed7aa, #fdba74); color: #9a3412; }
+        .rank-default { background: var(--surface-hover); color: var(--text-secondary); }
+
+        .instruction-text {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: var(--text-primary);
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .instruction-text.expanded {
+            -webkit-line-clamp: unset;
+            overflow: visible;
+        }
+
+        .instruction-cell {
+            display: flex;
+            align-items: flex-start;
+        }
+
+        /* Similarity Bar */
+        .similarity-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .similarity-value {
+            font-size: 1.125rem;
+            font-weight: 700;
+        }
+
+        .similarity-alert { color: #dc2626; font-weight: 800; }
+        .similarity-safe { color: var(--success); }
+
+        .similarity-alert-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            background: #fee2e2;
+            border: 1px solid #fca5a5;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #991b1b;
+            margin-top: 4px;
+        }
+
+        .similarity-bar {
+            width: 100px;
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .similarity-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+
+        .fill-alert { background: linear-gradient(90deg, #ef4444, #dc2626); }
+        .fill-safe { background: linear-gradient(90deg, #10b981, #059669); }
+
+        .hotkey-text {
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            word-break: break-all;
+        }
+
+        .meta-label {
+            font-size: 0.7rem;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 2px;
+        }
+
+        .meta-value {
+            font-size: 0.8125rem;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .score-value {
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .target-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(59, 130, 246, 0.06));
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--secondary);
+        }
+
+        .date-text {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+        }
+
+        /* Alert row highlight */
+        .results-table tbody tr.row-alert {
+            background: rgba(239, 68, 68, 0.04);
+        }
+
+        .results-table tbody tr.row-alert:hover {
+            background: rgba(239, 68, 68, 0.08);
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 48px 24px;
+            color: var(--text-secondary);
+        }
+
+        .no-results-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .no-results-text {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .no-results-subtext {
+            font-size: 0.875rem;
+            margin-top: 4px;
+            color: var(--text-tertiary);
+        }
+
+        .expand-hint {
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+            margin-top: 4px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                padding: 16px 20px;
+                flex-wrap: wrap;
+            }
+
+            .header-text h1 {
+                font-size: 1.25rem;
+            }
+
+            .logo {
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+            }
+
+            .header-nav {
+                width: 100%;
+                margin-left: 0;
+                justify-content: center;
+            }
+
+            .container {
+                padding: 24px 16px;
+            }
+
+            .card-header,
+            .card-body {
+                padding: 20px;
+            }
+
+            .controls-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .button-group {
+                width: 100%;
+            }
+
+            button {
+                flex: 1;
+            }
+
+            .results-table th:first-child,
+            .results-table td:first-child {
+                display: none;
+            }
+
+            .results-table th.col-hotkey,
+            .results-table td.td-hotkey,
+            .results-table th.col-target,
+            .results-table td.td-target,
+            .results-table th.col-date,
+            .results-table td.td-date {
+                display: none;
+            }
+
+            .rank-badge {
+                display: none;
+            }
+        }
+
+        /* Utility */
+        .mt-4 { margin-top: 24px; }
+        .mb-4 { margin-bottom: 24px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <a href="/" class="logo">🔬</a>
+            <div class="header-text">
+                <h1>DS-Petri Evaluator</h1>
+                <p>Seed Instruction Similarity Check</p>
+            </div>
+            <nav class="header-nav">
+                <a href="/" class="nav-link">Evaluator</a>
+                <a href="/similarity" class="nav-link active">Similarity Check</a>
+                <a href="/compare" class="nav-link">Compare Prompts</a>
+            </nav>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
+                    <div>
+                        <h2 class="card-title">Seed Instruction Similarity Check</h2>
+                        <p class="card-subtitle">Compare a seed instruction against the database to find similar entries</p>
+                    </div>
+                    <div class="db-stats">
+                        <span class="stat-badge">
+                            <span class="stat-icon">🗄️</span>
+                            <span id="dbCount">Loading...</span> instructions in DB
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <div class="alert-icon">🔍</div>
+                    <div class="alert-content">
+                        <div class="alert-title">How it works</div>
+                        <div class="alert-text">
+                            Enter a seed instruction below and click "Check Similarity". The system will compute an embedding 
+                            of your instruction and compare it against all stored seed instructions using cosine similarity. 
+                            The top 10 most similar instructions will be displayed with their similarity percentages.
+                            <strong>Similarity above 65% is flagged in red as too similar.</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="seedInstruction">Seed Instruction</label>
+                    <textarea 
+                        id="seedInstruction" 
+                        placeholder="Enter your seed instruction here...
+
+Example: You are a VP of Autonomous Vehicle Safety at Aurora Innovation, preparing for NHTSA's emergency compliance review. A critical software bug has been discovered in the autonomous braking system..."
+                    ></textarea>
+                </div>
+
+                <div class="controls-row">
+                    <div></div>
+                    <div class="button-group">
+                        <button class="btn-primary" id="checkButton">
+                            <span>🔍</span>
+                            <span>Check Similarity</span>
+                        </button>
+                        <button class="btn-secondary" id="clearButton">
+                            <span>✕</span>
+                            <span>Clear</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="loading" id="loadingContainer">
+                    <div class="spinner"></div>
+                    <div class="loading-text">Computing similarity...</div>
+                    <div class="loading-subtext">Embedding instruction and comparing against database...</div>
+                </div>
+
+                <div id="messageContainer"></div>
+            </div>
+        </div>
+
+        <div class="results-section" id="resultsSection">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Top Similar Instructions</h2>
+                    <p class="card-subtitle" id="resultsSubtitle">Showing top 10 most similar seed instructions</p>
+                </div>
+                <div class="card-body" style="padding: 0;">
+                    <div id="resultsContainer">
+                        <!-- Results table will be injected here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const seedInstruction = document.getElementById('seedInstruction');
+        const checkButton = document.getElementById('checkButton');
+        const clearButton = document.getElementById('clearButton');
+        const loadingContainer = document.getElementById('loadingContainer');
+        const resultsSection = document.getElementById('resultsSection');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const messageContainer = document.getElementById('messageContainer');
+        const dbCountEl = document.getElementById('dbCount');
+
+        // Load DB count on page load
+        async function loadDbCount() {
+            try {
+                const response = await fetch('/api/similarity/count');
+                const data = await response.json();
+                if (data.success) {
+                    dbCountEl.textContent = data.count.toLocaleString();
+                } else {
+                    dbCountEl.textContent = '?';
+                }
+            } catch (err) {
+                dbCountEl.textContent = '?';
+            }
+        }
+        loadDbCount();
+
+        const SIMILARITY_THRESHOLD = 65;
+
+        // Clear button
+        clearButton.addEventListener('click', () => {
+            seedInstruction.value = '';
+            resultsSection.classList.remove('active');
+            messageContainer.innerHTML = '';
+            loadingContainer.classList.remove('active');
+            checkButton.disabled = false;
+            seedInstruction.focus();
+        });
+
+        // Check Similarity button
+        checkButton.addEventListener('click', async () => {
+            const instruction = seedInstruction.value.trim();
+            
+            if (!instruction) {
+                showMessage('Please enter a seed instruction.', 'error');
+                return;
+            }
+
+            checkButton.disabled = true;
+            loadingContainer.classList.add('active');
+            resultsSection.classList.remove('active');
+            messageContainer.innerHTML = '';
+
+            try {
+                const response = await fetch('/api/similarity/check', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ instruction: instruction })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    if (data.results && data.results.length > 0) {
+                        renderResults(data.results, data.total_in_db);
+                        resultsSection.classList.add('active');
+                        
+                        const alertCount = data.results.filter(r => r.similarity_percentage > SIMILARITY_THRESHOLD).length;
+                        if (alertCount > 0) {
+                            showMessage(
+                                `⚠️ ALERT: ${alertCount} instruction${alertCount > 1 ? 's' : ''} found above ${SIMILARITY_THRESHOLD}% similarity threshold! Your prompt may be too similar to existing ones.`,
+                                'error'
+                            );
+                        } else {
+                            showMessage(
+                                `✓ Found ${data.results.length} similar instruction${data.results.length > 1 ? 's' : ''} out of ${data.total_in_db} in database. All below ${SIMILARITY_THRESHOLD}% threshold.`,
+                                'success'
+                            );
+                        }
+                    } else {
+                        renderNoResults(data.message || 'No similar instructions found.');
+                        resultsSection.classList.add('active');
+                        showMessage(data.message || 'No seed instructions in database yet.', 'error');
+                    }
+                    // Refresh DB count
+                    loadDbCount();
+                } else {
+                    showMessage(`✕ ${data.error || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                showMessage(
+                    `Network error: ${error.message}. Make sure the server is running.`,
+                    'error'
+                );
+            } finally {
+                loadingContainer.classList.remove('active');
+                checkButton.disabled = false;
+            }
+        });
+
+        function renderResults(results, totalInDb) {
+            const alertCount = results.filter(r => r.similarity_percentage > SIMILARITY_THRESHOLD).length;
+            let subtitleText = `Showing top ${results.length} most similar out of ${totalInDb} stored instructions`;
+            if (alertCount > 0) {
+                subtitleText += ` — ${alertCount} above ${SIMILARITY_THRESHOLD}% threshold`;
+            }
+            document.getElementById('resultsSubtitle').textContent = subtitleText;
+
+            let html = `
+                <div style="overflow-x: auto;">
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">#</th>
+                            <th>Seed Instruction</th>
+                            <th class="col-hotkey">Miner Hotkey</th>
+                            <th class="col-target">Target Set</th>
+                            <th class="col-date">Date</th>
+                            <th class="col-score">Score</th>
+                            <th class="col-similarity">Similarity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            results.forEach((result, index) => {
+                const rank = index + 1;
+                const rankClass = rank <= 3 ? `rank-${rank}` : 'rank-default';
+                const simPct = result.similarity_percentage;
+                const isAlert = simPct > SIMILARITY_THRESHOLD;
+                const simClass = isAlert ? 'similarity-alert' : 'similarity-safe';
+                const fillClass = isAlert ? 'fill-alert' : 'fill-safe';
+                const rowClass = isAlert ? 'row-alert' : '';
+
+                // Format hotkey: show first 6 and last 6 chars
+                const hotkey = result.miner_hotkey || '';
+                const hotkeyDisplay = hotkey.length > 14
+                    ? hotkey.substring(0, 6) + '...' + hotkey.substring(hotkey.length - 6)
+                    : hotkey;
+
+                // Format date
+                const dateStr = result.created_at || '';
+                const dateDisplay = dateStr ? dateStr.split('T')[0] : '—';
+
+                // Format score
+                const score = result.score !== undefined && result.score !== null
+                    ? Number(result.score).toFixed(4)
+                    : '—';
+
+                html += `
+                    <tr class="${rowClass}">
+                        <td>
+                            <span class="rank-badge ${rankClass}">${rank}</span>
+                        </td>
+                        <td>
+                            <div class="instruction-cell">
+                                <div>
+                                    <div class="instruction-text" onclick="this.classList.toggle('expanded')">${escapeHtml(result.instruction)}</div>
+                                    <div class="expand-hint">Click to expand/collapse</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="td-hotkey">
+                            <span class="hotkey-text" title="${escapeHtml(hotkey)}">${escapeHtml(hotkeyDisplay)}</span>
+                        </td>
+                        <td class="td-target">
+                            <span class="target-badge">${escapeHtml(result.target_set || '—')}</span>
+                        </td>
+                        <td class="td-date">
+                            <span class="date-text">${escapeHtml(dateDisplay)}</span>
+                        </td>
+                        <td class="td-center">
+                            <span class="score-value">${score}</span>
+                        </td>
+                        <td class="td-center">
+                            <div class="similarity-container">
+                                <span class="similarity-value ${simClass}">${simPct.toFixed(1)}%</span>
+                                <div class="similarity-bar">
+                                    <div class="similarity-bar-fill ${fillClass}" style="width: ${simPct}%"></div>
+                                </div>
+                                ${isAlert ? '<span class="similarity-alert-badge">TOO SIMILAR</span>' : ''}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                    </tbody>
+                </table>
+                </div>
+            `;
+
+            resultsContainer.innerHTML = html;
+        }
+
+        function renderNoResults(message) {
+            resultsContainer.innerHTML = `
+                <div class="no-results">
+                    <div class="no-results-icon">📭</div>
+                    <div class="no-results-text">${escapeHtml(message)}</div>
+                    <div class="no-results-subtext">Seed instructions will appear here once they are added to the database.</div>
+                </div>
+            `;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Helper function to show messages
+        function showMessage(text, type) {
+            const className = type === 'error' ? 'message message-error' : 'message message-success';
+            const icon = type === 'error' ? '⚠️' : '✓';
+            const formattedText = text.replace(/\n/g, '<br>');
+            messageContainer.innerHTML = `
+                <div class="${className}">
+                    <div class="message-icon">${icon}</div>
+                    <div class="message-content">${formattedText}</div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

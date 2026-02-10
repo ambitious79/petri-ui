@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compare Prompts - DS-Petri Evaluator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --primary-light: #60a5fa;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --surface-hover: #f1f5f9;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --text-tertiary: #94a3b8;
+            --border: #e2e8f0;
+            --border-focus: #3b82f6;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--background); color: var(--text-primary);
+            line-height: 1.6; -webkit-font-smoothing: antialiased;
+        }
+
+        /* Header */
+        .header {
+            background: var(--surface); border-bottom: 1px solid var(--border);
+            box-shadow: var(--shadow-sm); position: sticky; top: 0; z-index: 100;
+        }
+        .header-content {
+            max-width: 1200px; margin: 0 auto; padding: 16px 24px;
+            display: flex; align-items: center; gap: 16px;
+        }
+        .logo {
+            width: 44px; height: 44px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            font-size: 22px; flex-shrink: 0; text-decoration: none;
+        }
+        .header-text h1 { font-size: 1.35rem; font-weight: 700; }
+        .header-text p { font-size: 0.8rem; color: var(--text-secondary); }
+        .header-nav {
+            margin-left: auto; display: flex; gap: 8px; align-items: center;
+        }
+        .nav-link {
+            padding: 7px 14px; font-size: 0.8125rem; font-weight: 500;
+            color: var(--text-secondary); text-decoration: none;
+            border-radius: 8px; transition: all 0.2s;
+        }
+        .nav-link:hover { color: var(--primary); background: rgba(59,130,246,0.08); }
+        .nav-link.active { color: var(--primary); background: rgba(59,130,246,0.1); font-weight: 600; }
+
+        /* Container */
+        .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+        /* Card */
+        .card {
+            background: var(--surface); border-radius: 14px;
+            border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden;
+        }
+        .card-header { padding: 20px; border-bottom: 1px solid var(--border); }
+        .card-title { font-size: 1.05rem; font-weight: 600; margin-bottom: 2px; }
+        .card-subtitle { font-size: 0.8rem; color: var(--text-secondary); }
+        .card-body { padding: 20px; }
+
+        /* Two-column prompt inputs */
+        .prompts-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .prompt-col { display: flex; flex-direction: column; }
+        .prompt-label {
+            display: flex; align-items: center; gap: 8px;
+            font-weight: 600; font-size: 0.8125rem; margin-bottom: 8px;
+        }
+        .prompt-badge {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 22px; height: 22px; border-radius: 6px;
+            font-size: 0.7rem; font-weight: 700; color: white; flex-shrink: 0;
+        }
+        .badge-a { background: var(--primary); }
+        .badge-b { background: var(--secondary); }
+
+        textarea {
+            width: 100%; min-height: 200px; padding: 12px;
+            border: 1.5px solid var(--border); border-radius: 10px;
+            font-size: 0.875rem; font-family: inherit; color: var(--text-primary);
+            resize: vertical; transition: all 0.2s; line-height: 1.6; flex: 1;
+        }
+        textarea::placeholder { color: var(--text-tertiary); }
+        textarea:hover { border-color: var(--primary-light); }
+        textarea:focus { outline: none; border-color: var(--border-focus); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+        .word-count {
+            text-align: right; font-size: 0.7rem; color: var(--text-tertiary);
+            margin-top: 6px;
+        }
+
+        /* Buttons */
+        .controls {
+            display: flex; justify-content: center; align-items: center;
+            gap: 12px; margin-top: 20px;
+        }
+        button {
+            padding: 10px 24px; font-size: 0.875rem; font-weight: 600;
+            border: none; border-radius: 8px; cursor: pointer;
+            transition: all 0.2s; font-family: inherit;
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-primary { background: var(--primary); color: white; box-shadow: var(--shadow-sm); }
+        .btn-primary:hover:not(:disabled) { background: var(--primary-dark); box-shadow: var(--shadow-md); transform: translateY(-1px); }
+        .btn-primary:active:not(:disabled) { transform: translateY(0); }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+        .btn-secondary { background: var(--surface-hover); color: var(--text-primary); border: 1px solid var(--border); }
+        .btn-secondary:hover { background: #e2e8f0; }
+        .btn-swap {
+            background: var(--surface); border: 1.5px solid var(--border);
+            color: var(--text-secondary); border-radius: 50%;
+            width: 36px; height: 36px; padding: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem;
+        }
+        .btn-swap:hover { border-color: var(--primary); color: var(--primary); background: rgba(59,130,246,0.06); }
+
+        /* Loading */
+        .loading { display: none; text-align: center; padding: 24px; }
+        .loading.active { display: block; }
+        .spinner {
+            width: 36px; height: 36px;
+            border: 3px solid var(--border); border-top-color: var(--primary);
+            border-radius: 50%; animation: spin 0.8s linear infinite;
+            margin: 0 auto 12px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { font-size: 0.875rem; font-weight: 500; color: var(--text-secondary); }
+
+        /* Result */
+        .result-section { display: none; margin-top: 24px; }
+        .result-section.active { display: block; }
+
+        .result-card {
+            background: var(--surface); border-radius: 16px;
+            border: 1px solid var(--border); box-shadow: var(--shadow-md);
+            padding: 32px; text-align: center;
+        }
+        .result-label {
+            font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.06em; color: var(--text-tertiary); margin-bottom: 8px;
+        }
+        .result-score {
+            font-size: 4rem; font-weight: 800; line-height: 1; margin-bottom: 4px;
+        }
+        .result-percent {
+            font-size: 1.5rem; font-weight: 600; color: var(--text-tertiary);
+            vertical-align: super;
+        }
+        .result-bar-container {
+            max-width: 400px; margin: 20px auto 0;
+            background: var(--surface-hover); border-radius: 8px;
+            height: 12px; overflow: hidden; border: 1px solid var(--border);
+        }
+        .result-bar {
+            height: 100%; border-radius: 8px;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .result-details {
+            display: flex; justify-content: center; gap: 32px;
+            margin-top: 16px;
+        }
+        .result-detail {
+            font-size: 0.8rem; color: var(--text-secondary);
+        }
+        .result-detail span { font-weight: 600; color: var(--text-primary); }
+
+        .result-interpretation {
+            margin-top: 16px; padding: 12px 16px;
+            border-radius: 10px; font-size: 0.8125rem;
+            display: inline-block;
+        }
+
+        /* Message */
+        .message {
+            padding: 12px 16px; border-radius: 10px; margin-top: 16px;
+            display: flex; align-items: flex-start; gap: 10px; font-size: 0.8125rem;
+        }
+        .message-error { background: #fee2e2; border: 1px solid #fca5a5; color: #991b1b; }
+
+        /* History */
+        .history-section { margin-top: 24px; }
+        .history-list { display: flex; flex-direction: column; gap: 8px; }
+        .history-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 16px; background: var(--surface);
+            border: 1px solid var(--border); border-radius: 10px;
+            font-size: 0.8rem; cursor: pointer; transition: all 0.2s;
+        }
+        .history-item:hover { box-shadow: var(--shadow-md); border-color: var(--primary-light); }
+        .history-score {
+            font-size: 1rem; font-weight: 800; flex-shrink: 0;
+            min-width: 60px; text-align: center;
+        }
+        .history-prompts { flex: 1; min-width: 0; display: flex; gap: 8px; }
+        .history-prompt {
+            flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            color: var(--text-secondary); min-width: 0;
+        }
+        .history-vs {
+            color: var(--text-tertiary); font-weight: 600; font-size: 0.7rem;
+            flex-shrink: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content { padding: 12px 16px; flex-wrap: wrap; }
+            .header-nav { width: 100%; margin-left: 0; justify-content: center; }
+            .container { padding: 16px; }
+            .prompts-grid { grid-template-columns: 1fr; }
+            .result-score { font-size: 3rem; }
+            .result-details { flex-direction: column; gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <a href="/" class="logo">🔬</a>
+            <div class="header-text">
+                <h1>DS-Petri Evaluator</h1>
+                <p>Prompt Similarity Comparison</p>
+            </div>
+            <nav class="header-nav">
+                <a href="/" class="nav-link">Evaluator</a>
+                <a href="/similarity" class="nav-link">Similarity Check</a>
+                <a href="/compare" class="nav-link active">Compare Prompts</a>
+            </nav>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Compare Two Prompts</h2>
+                <p class="card-subtitle">Enter two prompts to check how similar they are using embedding-based cosine similarity</p>
+            </div>
+            <div class="card-body">
+                <div class="prompts-grid">
+                    <div class="prompt-col">
+                        <label class="prompt-label">
+                            <span class="prompt-badge badge-a">A</span>
+                            <span>First Prompt</span>
+                        </label>
+                        <textarea id="promptA" placeholder="Enter the first prompt here..."></textarea>
+                        <div class="word-count" id="wordCountA">0 words</div>
+                    </div>
+                    <div class="prompt-col">
+                        <label class="prompt-label">
+                            <span class="prompt-badge badge-b">B</span>
+                            <span>Second Prompt</span>
+                        </label>
+                        <textarea id="promptB" placeholder="Enter the second prompt here..."></textarea>
+                        <div class="word-count" id="wordCountB">0 words</div>
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <button class="btn-swap" id="swapBtn" title="Swap prompts">⇄</button>
+                    <button class="btn-primary" id="compareBtn">
+                        <span>🔍</span>
+                        <span>Compare Similarity</span>
+                    </button>
+                    <button class="btn-secondary" id="clearBtn">
+                        <span>✕</span>
+                        <span>Clear</span>
+                    </button>
+                </div>
+
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <div class="loading-text">Computing embeddings and comparing...</div>
+                </div>
+
+                <div id="messageContainer"></div>
+
+                <div class="result-section" id="resultSection">
+                    <div class="result-card">
+                        <div class="result-label">Similarity Score</div>
+                        <div>
+                            <span class="result-score" id="resultScore">0</span><span class="result-percent">%</span>
+                        </div>
+                        <div class="result-bar-container">
+                            <div class="result-bar" id="resultBar" style="width: 0%;"></div>
+                        </div>
+                        <div class="result-details">
+                            <div class="result-detail">Prompt A: <span id="resultWordsA">0</span> words</div>
+                            <div class="result-detail">Prompt B: <span id="resultWordsB">0</span> words</div>
+                        </div>
+                        <div class="result-interpretation" id="resultInterpretation"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="history-section" id="historySection" style="display: none;">
+            <div class="card">
+                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2 class="card-title">Comparison History</h2>
+                    <button class="btn-secondary" id="clearHistoryBtn" style="padding: 6px 12px; font-size: 0.7rem;">
+                        🗑️ Clear History
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="history-list" id="historyList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        const promptA = document.getElementById('promptA');
+        const promptB = document.getElementById('promptB');
+        const wordCountA = document.getElementById('wordCountA');
+        const wordCountB = document.getElementById('wordCountB');
+        const compareBtn = document.getElementById('compareBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const swapBtn = document.getElementById('swapBtn');
+        const loading = document.getElementById('loading');
+        const messageContainer = document.getElementById('messageContainer');
+        const resultSection = document.getElementById('resultSection');
+        const resultScore = document.getElementById('resultScore');
+        const resultBar = document.getElementById('resultBar');
+        const resultWordsA = document.getElementById('resultWordsA');
+        const resultWordsB = document.getElementById('resultWordsB');
+        const resultInterpretation = document.getElementById('resultInterpretation');
+        const historySection = document.getElementById('historySection');
+        const historyList = document.getElementById('historyList');
+        const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+
+        let history = [];
+
+        // Word count
+        function updateWordCount(textarea, el) {
+            const words = textarea.value.trim() ? textarea.value.trim().split(/\s+/).length : 0;
+            el.textContent = `${words} word${words !== 1 ? 's' : ''}`;
+        }
+        promptA.addEventListener('input', () => updateWordCount(promptA, wordCountA));
+        promptB.addEventListener('input', () => updateWordCount(promptB, wordCountB));
+
+        // Swap
+        swapBtn.addEventListener('click', () => {
+            const tmp = promptA.value;
+            promptA.value = promptB.value;
+            promptB.value = tmp;
+            updateWordCount(promptA, wordCountA);
+            updateWordCount(promptB, wordCountB);
+        });
+
+        // Clear
+        clearBtn.addEventListener('click', () => {
+            promptA.value = '';
+            promptB.value = '';
+            updateWordCount(promptA, wordCountA);
+            updateWordCount(promptB, wordCountB);
+            resultSection.classList.remove('active');
+            messageContainer.innerHTML = '';
+            promptA.focus();
+        });
+
+        // Score color
+        function scoreColor(pct) {
+            const t = Math.max(0, Math.min(100, pct)) / 100;
+            let r, g, b;
+            if (t <= 0.5) {
+                const p = t / 0.5;
+                r = 220; g = Math.round(50 + p * 150); b = Math.round(30 + p * 10);
+            } else {
+                const p = (t - 0.5) / 0.5;
+                r = Math.round(220 - p * 190); g = Math.round(200 + p * 30); b = Math.round(40 + p * 80);
+            }
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        function interpret(pct) {
+            if (pct >= 95) return { text: 'Nearly Identical', bg: '#d1fae5', color: '#065f46' };
+            if (pct >= 85) return { text: 'Very Similar', bg: '#d1fae5', color: '#065f46' };
+            if (pct >= 70) return { text: 'Similar', bg: '#dbeafe', color: '#1e40af' };
+            if (pct >= 50) return { text: 'Moderately Similar', bg: '#fef3c7', color: '#92400e' };
+            if (pct >= 30) return { text: 'Somewhat Related', bg: '#fed7aa', color: '#9a3412' };
+            return { text: 'Not Similar', bg: '#fee2e2', color: '#991b1b' };
+        }
+
+        function escapeHtml(text) {
+            const d = document.createElement('div');
+            d.textContent = text;
+            return d.innerHTML;
+        }
+
+        // Compare
+        compareBtn.addEventListener('click', async () => {
+            const a = promptA.value.trim();
+            const b = promptB.value.trim();
+
+            if (!a || !b) {
+                messageContainer.innerHTML = '<div class="message message-error"><span style="font-size:18px;">⚠️</span><span>Please enter both prompts.</span></div>';
+                setTimeout(() => { messageContainer.innerHTML = ''; }, 4000);
+                return;
+            }
+
+            compareBtn.disabled = true;
+            loading.classList.add('active');
+            resultSection.classList.remove('active');
+            messageContainer.innerHTML = '';
+
+            try {
+                const resp = await fetch('/api/similarity/compare', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt_a: a, prompt_b: b })
+                });
+                const data = await resp.json();
+
+                if (data.success) {
+                    const pct = data.similarity_percentage;
+                    const color = scoreColor(pct);
+                    const interp = interpret(pct);
+
+                    resultScore.textContent = pct.toFixed(1);
+                    resultScore.style.color = color;
+                    resultBar.style.width = `${pct}%`;
+                    resultBar.style.background = `linear-gradient(90deg, ${color}, ${scoreColor(Math.min(100, pct + 10))})`;
+                    resultWordsA.textContent = data.prompt_a_length;
+                    resultWordsB.textContent = data.prompt_b_length;
+                    resultInterpretation.textContent = interp.text;
+                    resultInterpretation.style.background = interp.bg;
+                    resultInterpretation.style.color = interp.color;
+                    resultSection.classList.add('active');
+
+                    // Add to history
+                    history.unshift({ a, b, pct, color });
+                    if (history.length > 20) history.pop();
+                    renderHistory();
+                } else {
+                    messageContainer.innerHTML = `<div class="message message-error"><span style="font-size:18px;">⚠️</span><span>${escapeHtml(data.error)}</span></div>`;
+                }
+            } catch (err) {
+                messageContainer.innerHTML = `<div class="message message-error"><span style="font-size:18px;">⚠️</span><span>Network error: ${escapeHtml(err.message)}</span></div>`;
+            } finally {
+                loading.classList.remove('active');
+                compareBtn.disabled = false;
+            }
+        });
+
+        // History
+        function renderHistory() {
+            if (history.length === 0) {
+                historySection.style.display = 'none';
+                return;
+            }
+            historySection.style.display = '';
+            historyList.innerHTML = history.map((h, i) => `
+                <div class="history-item" data-idx="${i}">
+                    <div class="history-score" style="color: ${h.color}">${h.pct.toFixed(1)}%</div>
+                    <div class="history-prompts">
+                        <div class="history-prompt">${escapeHtml(h.a)}</div>
+                        <span class="history-vs">VS</span>
+                        <div class="history-prompt">${escapeHtml(h.b)}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            historyList.querySelectorAll('.history-item').forEach(el => {
+                el.addEventListener('click', () => {
+                    const idx = parseInt(el.dataset.idx);
+                    const h = history[idx];
+                    if (h) {
+                        promptA.value = h.a;
+                        promptB.value = h.b;
+                        updateWordCount(promptA, wordCountA);
+                        updateWordCount(promptB, wordCountB);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                });
+            });
+        }
+
+        clearHistoryBtn.addEventListener('click', () => {
+            history = [];
+            renderHistory();
+        });
+    })();
+    </script>
+</body>
+</html>
